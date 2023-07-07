@@ -32,8 +32,7 @@ correlate_polchoice <- function(
     measure,
     by = NULL,
     weight_col = NULL,
-    marginalize_attitude_cols = FALSE
-) {
+    marginalize_attitude_cols = FALSE) {
 
   # Substituting the expression passed to these arguments
   weight_col <- substitute(weight_col)
@@ -43,41 +42,34 @@ correlate_polchoice <- function(
 
   # Function to calculate the association between attitudes and partisanship using syntax compatible with functions related to the survey package
   calc_assoc <- function(
-    data,
-    col1 = "att_val",
-    col2 = party_col
-  ) {
+      data,
+      col1 = "att_val",
+      col2 = party_col) {
     if (measure == "r") {
-
       if (!is.numeric(party_col_value)) {
-
         stop(
           "Estimating Pearson correlations requires numeric values (e.g., ordinal party strength, left-right party family, or a single dummy variable)."
         )
-
       }
 
       fmla <- as.formula(paste0("~", col1, " + ", col2))
       assoc <- jtools::svycor(fmla, design = data)
       return(assoc)
-
     } else if (measure == "r2") {
-
       fmla <- as.formula(paste0(col1, "~", col2))
       assoc <- survey::svyglm(fmla, design = data)
       return(summary.lm(assoc))
-
     } else {
       stop("The measure argument must be set to `r' or `r2'.")
-      }
+    }
   }
 
   input <- data |>
     select(
       any_of(attitude_cols),
       any_of(by),
-      {{party_col}},
-      {{weight_col}}
+      {{ party_col }},
+      {{ weight_col }}
     ) |>
     pivot_longer(
       cols = any_of(attitude_cols),
@@ -85,14 +77,13 @@ correlate_polchoice <- function(
       values_to = "att_val"
     ) |>
     # Filtering pairwise complete observations that are used to estimate partisan polarization
-    drop_na({{party_col}}, att_val)
+    drop_na({{ party_col }}, att_val)
 
   if (!is.null(weight_col)) {
     # Subsetting to weighted sample
     input <- input |>
-      drop_na({{weight_col}}) |>
+      drop_na({{ weight_col }}) |>
       filter(.data[[weight_col]] != 0)
-
   }
 
   if (marginalize_attitude_cols) {
@@ -100,8 +91,7 @@ correlate_polchoice <- function(
     nested_data <- nest_by(
       input,
       across(any_of(by))
-      )
-
+    )
   } else {
     # Maintaining attitude items as separate variables
     nested_data <- nest_by(
@@ -109,7 +99,6 @@ correlate_polchoice <- function(
       att_item,
       across(any_of(by))
     )
-
   }
   # Creating survey objects by group
   survey_objects <- tidytable::mutate(
@@ -118,51 +107,48 @@ correlate_polchoice <- function(
       data,
       as_survey_design,
       ids = 1,
-      weights = {{weight_col}}
-      )
+      weights = {{ weight_col }}
+    )
   )
   # Looping through survey objects to calculate association
   output <- tidytable::mutate(
-      survey_objects,
-      assoc_list = tidytable::map(
-        design_list,
-        calc_assoc
-      )
-      )
-
-    if (measure == "r") {
-      # Extracting Pearson correlation coefficient from every 2*2 matrix
-      output <- mutate(
-        output,
-        r = map(
-          assoc_list,
-          ~ .x$cors[2]
-          )
-      )
-
-    } else if (measure == "r2") {
-      # Extracting coefficient of determination and adjusted R-squared from every summary.lm object
-      output <- mutate(
-        output,
-        r2 = map(
-          assoc_list,
-          `[[`,
-          "r.squared"
-          ),
-        adj_r2 = map(
-          assoc_list,
-          `[[`,
-          "adj.r.squared"
-        )
-        )
-
-    }
-    # Removing columns with nested data, survey objects, and correlation matrices/summary.lm objects
-    output <- select(
-      output,
-      -data, -design_list, -assoc_list
+    survey_objects,
+    assoc_list = tidytable::map(
+      design_list,
+      calc_assoc
     )
+  )
 
-    return(output)
+  if (measure == "r") {
+    # Extracting Pearson correlation coefficient from every 2*2 matrix
+    output <- mutate(
+      output,
+      r = map(
+        assoc_list,
+        ~ .x$cors[2]
+      )
+    )
+  } else if (measure == "r2") {
+    # Extracting coefficient of determination and adjusted R-squared from every summary.lm object
+    output <- mutate(
+      output,
+      r2 = map(
+        assoc_list,
+        `[[`,
+        "r.squared"
+      ),
+      adj_r2 = map(
+        assoc_list,
+        `[[`,
+        "adj.r.squared"
+      )
+    )
+  }
+  # Removing columns with nested data, survey objects, and correlation matrices/summary.lm objects
+  output <- select(
+    output,
+    -data, -design_list, -assoc_list
+  )
 
-    }
+  return(output)
+}

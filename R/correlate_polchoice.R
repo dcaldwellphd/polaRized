@@ -23,6 +23,7 @@
 #' @importFrom tidyr pivot_longer drop_na
 #' @importFrom tidytable mutate map
 #' @importFrom srvyr as_survey_design
+#' @importFrom rlang enquo as_name
 #' @import dplyr
 
 correlate_polchoice <- function(

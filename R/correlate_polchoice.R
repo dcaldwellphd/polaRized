@@ -3,20 +3,18 @@
 #' @description Estimates the association between attitudes and partisanship
 #'
 #' @param data A data set object
-#' @param attitude_cols A character vector with the names of attitude item columns
-#' @param party_col A character vector with the name of the party affiliation column
-#' @param measure A string specifying the measure of association. Use "r" to estimate the Pearson correlation between attitudes and an ordinal or dummy variable measure of partisanship. The value "r2" returns the coefficient of determination and adjusted R-squared from OLS models predicting attitudes from indicators of party support, which is useful for estimating partisan polarization in multiparty systems.
+#' @param attitude_col A column containing attitude item responses
+#' @param party_col A column containing party affiliation responses
+#' @param r_or_r2 A string specifying the measure of association. Use "r" to estimate the Pearson correlation between attitudes and an ordinal or dummy variable measure of partisanship. The value "r2" returns the coefficient of determination and adjusted R-squared from OLS models predicting attitudes from indicators of party support, which is useful for estimating partisan polarization in multiparty systems.
 #' @param by A character vector of optional groups to nest observations by (e.g. survey wave, country, social group)
 #' @param weight_col An optional column of survey weights
-#' @param marginalize_attitude_cols A logical value indicating whether to estimate association across or by attitude item. The default, FALSE, groups by attitude items
 
 #'
 #' @return A data frame object containing the measure of association between attitudes and partisanship
 
 #' @examples
 #' data(toydata)
-#' attitude_items <- c("item1", "item2", "item3", "item4", "item5")
-#' attitude_partisanship <- correlate_polchoice(data = toydata, attitude_cols = attitude_items, party_col = "party", measure = "r2", by = c("cntry", "year"), weight_col = weight)
+#' attitude_partisanship <- correlate_polchoice(data = toydata, attitude_col = attitude_vals, party_col = "party", r_or_r2 = "r2", by = c("attitude_names", cntry", "year"), weight_col = weight)
 #' @export
 #' @importFrom survey svyglm
 #' @importFrom jtools svycor
@@ -28,12 +26,11 @@
 
 correlate_polchoice <- function(
     data,
-    attitude_cols,
+    attitude_col,
     party_col,
-    measure,
+    r_or_r2,
     by = NULL,
-    weight_col = NULL,
-    marginalize_attitude_cols = FALSE) {
+    weight_col = NULL) {
 
   # Substituting the expression passed to these arguments
   weight_col <- substitute(weight_col)
@@ -46,7 +43,7 @@ correlate_polchoice <- function(
       data,
       col1 = "att_val",
       col2 = party_col) {
-    if (measure == "r") {
+    if (r_or_r2 == "r") {
       if (!is.numeric(party_col_value)) {
         stop(
           "Estimating Pearson correlations requires numeric values (e.g., ordinal party strength, left-right party family, or a single dummy variable)."
@@ -56,29 +53,26 @@ correlate_polchoice <- function(
       fmla <- as.formula(paste0("~", col1, " + ", col2))
       assoc <- jtools::svycor(fmla, design = data)
       return(assoc)
-    } else if (measure == "r2") {
+    } else if (r_or_r2 == "r2") {
       fmla <- as.formula(paste0(col1, "~", col2))
       assoc <- survey::svyglm(fmla, design = data)
       return(summary.lm(assoc))
     } else {
-      stop("The measure argument must be set to `r' or `r2'.")
+      stop("The r_or_r2 argument must be set to `r' or `r2'.")
     }
   }
 
   input <- data |>
     select(
-      any_of(attitude_cols),
-      any_of(by),
+      {{ attitude_col }},
       {{ party_col }},
-      {{ weight_col }}
-    ) |>
-    pivot_longer(
-      cols = any_of(attitude_cols),
-      names_to = "att_item",
-      values_to = "att_val"
+      {{ weight_col }},
+      any_of(by)
     ) |>
     # Filtering pairwise complete observations that are used to estimate partisan polarization
-    drop_na({{ party_col }}, att_val)
+    drop_na(
+      {{ party_col }}, {{ attitude_col }}
+      )
 
   if (!is.null(weight_col)) {
     # Subsetting to weighted sample
@@ -87,69 +81,59 @@ correlate_polchoice <- function(
       filter(.data[[weight_col]] != 0)
   }
 
-  if (marginalize_attitude_cols) {
-    # Treating all attitude items as a single variable
-    nested_data <- nest_by(
-      input,
-      across(any_of(by))
-    )
-  } else {
-    # Maintaining attitude items as separate variables
-    nested_data <- nest_by(
-      input,
-      att_item,
-      across(any_of(by))
-    )
-  }
-  # Creating survey objects by group
-  survey_objects <- tidytable::mutate(
-    nested_data,
-    design_list = tidytable::map(
-      data,
-      as_survey_design,
-      ids = 1,
-      weights = {{ weight_col }}
-    )
-  )
-  # Looping through survey objects to calculate association
-  output <- tidytable::mutate(
-    survey_objects,
-    assoc_list = tidytable::map(
-      design_list,
-      calc_assoc
-    )
-  )
+    # Creating survey design objects nested
+    # by any columns declared in the by argument
+    nested_cors <- input |>
+      nest_by(across(any_of(by))) |>
+      tidytable::mutate(
+        design_list = tidytable::map(
+          data,
+          as_survey_design,
+          ids = 1,
+          weights = {{ weight_col }}
+          )
+        ) |>
+      # Looping through survey objects to calculate association
+      tidytable::mutate(
+        assoc_list = tidytable::map(
+          design_list,
+          calc_assoc
+          )
+        )
 
-  if (measure == "r") {
-    # Extracting Pearson correlation coefficient from every 2*2 matrix
-    output <- mutate(
+    if (r_or_r2 == "r") {
+      # Extracting Pearson correlation coefficient from every 2*2 matrix
+      output <- mutate(
+        nested_cors,
+        r = map(
+          assoc_list,
+          ~ .x$cors[2]
+          )
+        )
+      } else if (r_or_r2 == "r2") {
+        # Extracting coefficient of determination and
+        # adjusted R-squared from every summary.lm object.
+        output <- mutate(
+          nested_cors,
+          r2 = map(
+            assoc_list,
+            `[[`,
+            "r.squared"
+            ),
+          adj_r2 = map(
+            assoc_list,
+            `[[`,
+            "adj.r.squared"
+            )
+        )
+        }
+    # Removing columns with nested data, survey objects,
+    # and correlation matrices/summary.lm objects.
+    output <- select(
       output,
-      r = map(
-        assoc_list,
-        ~ .x$cors[2]
+      -data, -design_list, -assoc_list
       )
-    )
-  } else if (measure == "r2") {
-    # Extracting coefficient of determination and adjusted R-squared from every summary.lm object
-    output <- mutate(
-      output,
-      r2 = map(
-        assoc_list,
-        `[[`,
-        "r.squared"
-      ),
-      adj_r2 = map(
-        assoc_list,
-        `[[`,
-        "adj.r.squared"
-      )
-    )
-  }
-  # Removing columns with nested data, survey objects, and correlation matrices/summary.lm objects
-  output <- select(
-    output,
-    -data, -design_list, -assoc_list
-  )
 
-  return(output)
-}
+    return(output)
+
+    }

@@ -1,12 +1,12 @@
 
+# NOTE to self: thinking about creating separate function to generate attitude pairs. Then I can collapse correlate_polchoice and correlate_attitudes into single function (calc_association?) where I pass two value columns (attitude*partisanship or attitude*attitude).
 
 correlate_attitudes <- function(
     data,
-    attitude_cols,
+    attitude_col,
     r_or_r2,
     by = NULL,
-    weight_col = NULL,
-    marginalize_attitude_cols = FALSE) {
+    weight_col = NULL) {
 
   # Substituting the expression passed to these arguments
   weight_col <- substitute(weight_col)
@@ -33,19 +33,24 @@ correlate_attitudes <- function(
 
   input <- data |>
     select(
-      any_of(attitude_cols),
-      any_of(by),
-      {{ weight_col }}
-    ) |>
-    pivot_longer(
-      cols = any_of(attitude_cols),
-      names_to = "att_item",
-      values_to = "att_val"
+      {{ attitude_col }},
+      {{ weight_col }},
+      any_of(by)
     )
+
+  # Creating character vector of unique attitude names
+  # to pass to combn below
+
+
+  select(att_item) |>
+    distinct() |>
+    pull(att_item)
 
   # Create a vector of all possible pairs of attitude items
   att_pairs <- combn(
-    attitude_cols,
+    attitude_cols |>
+      input |>
+      select({{  }}),
     2,
     simplify = TRUE
   ) |>

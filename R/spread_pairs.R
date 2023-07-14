@@ -69,6 +69,7 @@ spread_pairs <- function(
         other_keys,
         "V2" = "name_key_join"
       ),
+      # suffixes pasted to the value key in x and y
       suffix = c("1", "2"),
       relationship = "many-to-many"
     ) |>

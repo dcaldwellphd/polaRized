@@ -54,7 +54,6 @@ spread_pairs <- function(
       any_of(other_keys)
       )
 
-
   # Use attitude pairs to spread name column and value colmn in the data
   output <- input |>
     # Filtering to names found in first column of att_pairs

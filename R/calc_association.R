@@ -41,7 +41,6 @@
 #' @importFrom tidyr drop_na
 #' @importFrom tidytable mutate map
 #' @importFrom srvyr as_survey_design
-#' @importFrom rlang enquo as_name
 #' @importFrom tidyselect any_of
 #' @importFrom dplyr select filter nest_by across mutate
 
@@ -121,7 +120,7 @@ calc_association <- function(
       {{ value_1 }}, {{ value_2 }}
     )
 
-  if (!is.null(weight_col)) {
+  if (!is.null(weights)) {
     input <- input |>
       # Subsetting to weighted sample
       drop_na({{ weights }}) |>

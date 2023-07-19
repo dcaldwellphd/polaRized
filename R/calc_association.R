@@ -50,7 +50,7 @@ calc_association <- function(
     value_2,
     r_or_r2,
     by = NULL,
-    # Arguments to set in as_survey_design
+    # Arguments to set up survey design using as_survey_design from the srvyr package
     ids = NULL,
     probs = NULL,
     strata = NULL,
@@ -112,8 +112,12 @@ calc_association <- function(
     select(
       {{ value_1 }},
       {{ value_2 }},
-      {{ weights }},
-      any_of(by)
+      any_of(by),
+      {{ ids }},
+      {{ probs }},
+      {{ strata }},
+      {{ fpc }},
+      {{ weights }}
     ) |>
     # Filtering pairwise complete observations
     drop_na(

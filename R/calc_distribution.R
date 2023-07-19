@@ -29,7 +29,7 @@
 #' @importFrom tidytable mutate map
 #' @importFrom srvyr as_survey_design
 #' @importFrom tidyselect any_of
-#' @importFrom dplyr select filter nest_by across mutate
+#' @importFrom dplyr select filter nest_by across mutate rename_with
 
 calc_distribution <- function(
     data,
@@ -48,11 +48,17 @@ calc_distribution <- function(
     variance = c("HT", "YG")
 ) {
 
+  # For referencing values passed to value_1, value_2, and weights
+  value <- substitute(value)
+  weights <- substitute(weights)
 
   # Function to iterate over "by" groups,
   # calculating the association betwen values using syntax
   # compatible with functions related to the survey R package
-  distribute_values <- function(data, col = value) {
+  distribute_values <- function(
+    data,
+    col = value
+    ) {
     fmla <- as.formula(paste0("~", col))
 
     if (measure == "mean") {
@@ -69,10 +75,14 @@ calc_distribution <- function(
   input <- data |>
     select(
       {{ value }},
-      {{ weights }},
-      any_of(by)
+      any_of(by),
+      {{ ids }},
+      {{ probs }},
+      {{ strata }},
+      {{ fpc }},
+      {{ weights }}
     ) |>
-    # Filtering pairwise complete observations
+    # Filtering complete observations
     drop_na({{ value }})
 
   if (!is.null(weights)) {
@@ -82,8 +92,45 @@ calc_distribution <- function(
       filter(.data[[weights]] != 0)
   }
 
+  # Creating survey design objects nested by the "by" argument
+  nested_distr <- input |>
+    nest_by(across(any_of(by))) |>
+    # Using tidytable for speed
+    tidytable::mutate(
+      design_list = tidytable::map(
+        data,
+        as_survey_design,
+        ids = {{ ids }},
+        probs = {{ probs }},
+        strata = {{ strata }},
+        fpc = {{ fpc }},
+        nest = nest,
+        check_strata = check_strata,
+        weights = {{ weights }},
+        pps = pps,
+        variance = variance
+      )
+    )
+
+}
+  |>
+    # Looping through survey objects to calculate association
+    tidytable::mutate(
+      distr_list = tidytable::map(
+        design_list,
+        distribute_values
+      ),
+     value = unlist(distr_list)
+    ) |>
+    dplyr::rename_with(
+      ~ paste0("value_", measure, recycle0 = TRUE),
+      value
+      ) |>
+    select(-data, -design_list, -distr_list)
 
 
-  return(output)
+
+
+ # return(output)
 
 }

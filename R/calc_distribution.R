@@ -62,13 +62,25 @@ calc_distribution <- function(
     fmla <- as.formula(paste0("~", col))
 
     if (measure == "mean") {
-      distr <- survey::svymean(fmla, design = data, na.rm = TRUE)
-    } else if (measure == "median") {
-      distr <- survey::svyquantile(fmla, design = data, quantiles = 0.5)
+      distr <- survey::svymean(
+        fmla, design = data, na.rm = TRUE
+        )
+    } else if (
+      measure == "median" | measure == "iqr"
+      ) {
+      distr <- survey::svyquantile(
+        fmla, design = data, quantiles = c(
+          0.25, 0.5, 0.75
+          )
+        )
     } else if (measure == "sd") {
-      distr <- jtools::svysd(fmla, design = data, na.rm = TRUE)
+      distr <- jtools::svysd(
+        fmla, design = data, na.rm = TRUE
+        )
     } else if (measure == "kurtosis") {
-      distr <- svykurt(fmla, design = data, na.rm = TRUE)
+      distr <- svykurt(
+        fmla, design = data, na.rm = TRUE
+        )
     } else {
       stop("Did you forget to set the 'measure' argument?")
     }
@@ -126,17 +138,27 @@ calc_distribution <- function(
   if (measure == "median") {
     unnested_distr <- mutate(
       nested_distr,
-      value = map(
+      quants = map(
         distr_list,
         `[[`,
         value
         ),
-      value = map(
-        value,
-        `[`,
-        1
-      )
-    )
+      value = map(quants, `[`, 2)
+      ) |>
+      select(-quants)
+  } else if (measure == "iqr") {
+    unnested_distr <- mutate(
+      nested_distr,
+      quants = map(
+        distr_list,
+        `[[`,
+        value
+      ),
+      q1 = as.numeric(map(quants, `[`, 1)),
+      q3 = as.numeric(map(quants, `[`, 3)),
+      value = q3 - q1
+      ) |>
+      select(-quants, -q1, -q3)
 
   } else {
     unnested_distr <- mutate(

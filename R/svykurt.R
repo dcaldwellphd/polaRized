@@ -33,46 +33,15 @@ svykurt <- function(
   if (!inherits(design, "survey.design"))
     stop("design is not a survey design")
 
-  if (inherits(x,"formula")){
-    ## do the right thing with factors
-    mf<-model.frame(x,design$variables,na.action=na.pass)
-    xx<-lapply(attr(terms(x),"variables")[-1],
-               function(tt) model.matrix(eval(bquote(~0+.(tt))),mf))
-    cols<-sapply(xx,NCOL)
-    x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
-    scols<-c(0,cumsum(cols))
-    for(i in 1:length(xx)){
-      x[,scols[i]+1:cols[i]]<-xx[[i]]
-    }
-    colnames(x)<-do.call("c",lapply(xx,colnames))
-  }
-  else {
-    if(typeof(x) %in% c("expression","symbol"))
-      x<-eval(x, design$variables)
-    else if(is.data.frame(x) && any(sapply(x,is.factor))){
-      xx<-lapply(x, function(xi) {if (is.factor(xi)) 0+(outer(xi,levels(xi),"==")) else xi})
-      cols<-sapply(xx,NCOL)
-      scols<-c(0,cumsum(cols))
-      cn<-character(sum(cols))
-      for(i in 1:length(xx))
-        cn[scols[i]+1:cols[i]]<-paste(names(x)[i],levels(x[[i]]),sep="")
-      x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
-      for(i in 1:length(xx)){
-        x[,scols[i]+1:cols[i]]<-xx[[i]]
-      }
-      colnames(x)<-cn
-    }
-  }
-
-  x<-as.matrix(x)
+  x <- model.frame(x, model.frame(design), na.action = na.pass)
 
   if (na.rm){
-    nas<-rowSums(is.na(x))
-    design<-design[nas==0,]
-    if (length(nas)>length(design$prob))
-      x<-x[nas==0,,drop=FALSE]
+    nas <- rowSums(is.na(x))
+    design <- design[nas == 0, ]
+    if (length(nas) > length(design$prob))
+      x <- x[nas == 0, , drop = FALSE]
     else
-      x[nas>0,]<-0
+      x[nas > 0, ] <- 0
   }
 
   pweights <- 1/design$prob
@@ -100,9 +69,3 @@ print.svykurt <- function(x) {
 
   print(m)
 }
-
-
-data(api)
-dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
-svykurt(x = ~api00, dclus1, na.rm = TRUE)
-

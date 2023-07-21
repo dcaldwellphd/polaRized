@@ -63,8 +63,12 @@ calc_distribution <- function(
 
     if (measure == "mean") {
       distr <- survey::svymean(fmla, design = data, na.rm = TRUE)
+    } else if (measure == "median") {
+      distr <- survey::svyquantile(fmla, design = data, quantiles = 0.5)
     } else if (measure == "sd") {
       distr <- jtools::svysd(fmla, design = data, na.rm = TRUE)
+    } else if (measure == "kurtosis") {
+      distr <- svykurt(fmla, design = data, na.rm = TRUE)
     } else {
       stop("Did you forget to set the 'measure' argument?")
     }
@@ -110,18 +114,38 @@ calc_distribution <- function(
         pps = pps,
         variance = variance
       )
-    )
-
-}
-  |>
+    ) |>
     # Looping through survey objects to calculate association
     tidytable::mutate(
       distr_list = tidytable::map(
         design_list,
         distribute_values
-      ),
-     value = unlist(distr_list)
-    ) |>
+      )
+      )
+
+  if (measure == "median") {
+    unnested_distr <- mutate(
+      nested_distr,
+      value = map(
+        distr_list,
+        `[[`,
+        value
+        ),
+      value = map(
+        value,
+        `[`,
+        1
+      )
+    )
+
+  } else {
+    unnested_distr <- mutate(
+      nested_distr,
+      value = unlist(distr_list)
+    )
+  }
+
+  output <- unnested_distr |>
     dplyr::rename_with(
       ~ paste0("value_", measure, recycle0 = TRUE),
       value
@@ -129,8 +153,6 @@ calc_distribution <- function(
     select(-data, -design_list, -distr_list)
 
 
-
-
- # return(output)
+  return(output)
 
 }

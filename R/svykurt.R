@@ -7,10 +7,10 @@
 #' @param na.rm Logical. Should cases with missing values be dropped?
 #' @param excess Logical. The default (TRUE) subtracts 3 from the output, giving excess kurtosis.
 #'
-#' @return A 1*1 matrix with the kurtosis on x
+#' @return An object of class \code{svykurt} giving the kurtosis on x
 #'
 #' @examples
-#' #' if (requireNamespace("survey")) {
+#' if (requireNamespace("survey")) {
 #'  library(survey)
 #'  data(toydata)
 #' # Create survey design object
@@ -33,15 +33,14 @@ svykurt <- function(
   if (!inherits(design, "survey.design"))
     stop("design is not a survey design")
 
-  x <- model.frame(x, model.frame(design), na.action = na.pass)
+  x <- model.frame(x, design$variables, na.action = na.pass)
+  x <- as.matrix(x)
 
-  if (na.rm){
-    nas <- rowSums(is.na(x))
-    design <- design[nas == 0, ]
-    if (length(nas) > length(design$prob))
-      x <- x[nas == 0, , drop = FALSE]
-    else
-      x[nas > 0, ] <- 0
+  if (ncol(x) > 1)
+    stop("Only calculate kurtosis one variable at a time")
+
+  if(na.rm){
+    x <- x[!is.na(x)]
   }
 
   pweights <- 1/design$prob

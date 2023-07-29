@@ -1,4 +1,4 @@
-#' @title svyextremism
+#' @title svyprop_extremism
 #'
 #' @description Calculates proportion of extremism in complex survey data
 #'
@@ -31,15 +31,15 @@
 #' # Create survey design object
 #' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
 #' # Print the proportion of extremism on a variable without specifying extreme values
-#' svyextremism(x = ~att_5, design = toydesign)
+#' svyprop_extrmism(x = ~att_5, design = toydesign)
 #' # Print the proportion of extremism on a variable by specifying extreme values
-#' svyextremism(x = ~att_5, design = toydesign, extreme_vals = c(1, 5))
+#' svyprop_extrmism(x = ~att_5, design = toydesign, extreme_vals = c(1, 5))
 #'
 #' @export
 #'
 #' @importFrom survey svyciprop
 
-svyextremism <- function(
+svyprop_extrmism <- function(
     x,
     design,
     na.rm = FALSE,
@@ -101,6 +101,7 @@ svyextremism <- function(
       ),
     "))"
     )
+
   prop_extremism <- svyciprop(
     as.formula(fmla),
     design,

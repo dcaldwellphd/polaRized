@@ -1,4 +1,4 @@
-#' @title calc_association
+#' @title polarize_assoc
 #'
 #' @description Calculates associational measures of polarization
 #'
@@ -44,7 +44,7 @@
 #' @importFrom tidyselect any_of
 #' @importFrom dplyr select filter nest_by across mutate
 
-calc_association <- function(
+polarize_assoc <- function(
     data,
     value_1,
     value_2,

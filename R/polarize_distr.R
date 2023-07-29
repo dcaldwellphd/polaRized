@@ -1,4 +1,4 @@
-#' @title calc_distribution
+#' @title polarize_distr
 #'
 #' @description Calculates distributional measures of polarization
 #'
@@ -31,7 +31,7 @@
 #' @importFrom tidyselect any_of
 #' @importFrom dplyr select filter nest_by across mutate rename_with
 
-calc_distribution <- function(
+polarize_distr <- function(
     data,
     value,
     measure,
@@ -81,8 +81,8 @@ calc_distribution <- function(
       distr <- svykurt(
         fmla, design = data, na.rm = TRUE
         )
-    } else {
-      stop("Did you forget to set the 'measure' argument?")
+    } else if (measure == "extremism") {
+      distr <- survey::svytable(fmla, design = data)
     }
 
     return(distr)
@@ -134,6 +134,25 @@ calc_distribution <- function(
         distribute_values
       )
       )
+
+  if (measure == "extremism") {
+    unnested_distr <- nested_distr |>
+      unnest_wider(distr_list, names_sep = "_") |>
+      pivot_longer(
+        cols = contains("distr_list_"),
+        names_to = "r_option",
+        values_to = "freq"
+        ) |>
+      mutate(
+        r_option = str_remove(r_option, "distr_list_"),
+        r_option = as.numeric(r_option)
+        ) |>
+      drop_na(freq) |>
+      select(-data, -design_list) |>
+      nest_by(across(any_of(by))) |>
+
+  }
+}
 
   if (measure == "median") {
     unnested_distr <- mutate(

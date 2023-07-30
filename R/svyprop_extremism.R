@@ -76,13 +76,13 @@ svyprop_extrmism <- function(
       min(x, na.rm = TRUE)
     )
     # Sometimes "10-point" scales include 0
-  } else if (length(unique(x)) %in% c(10:11)) {
+  } else if (length(unique(x)) %in% c(10, 11)) {
     extremities <- c(
       sort(unique(x), decreasing = TRUE)[1:2],
       sort(unique(x))[1:2]
     )
     # Sometimes feeling thermometers include 0
-  } else if (length(unique(x)) %in% c(100:101)) {
+  } else if (length(unique(x)) %in% c(100, 101)) {
     extremities <- c(
       sort(unique(x), decreasing = TRUE)[1:20],
       sort(unique(x))[1:20]

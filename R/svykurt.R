@@ -14,9 +14,9 @@
 #'  library(survey)
 #'  data(toydata)
 #' # Create survey design object
-#' toydesign <- svydesign(data = toydata, ids = ~1, weights = ~weight)
+#' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
 #' # Print the excess kurtosis of a variable
-#' svykurt(x = ~att_val, design = toydesign, na.rm = TRUE)
+#' svykurt(x = ~att_5, design = toydesign)
 #'
 #' @export
 #'

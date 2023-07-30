@@ -22,17 +22,17 @@
 #'
 #' @examples
 #' # Partisan polarization using Pearson correlation between attitude item and ordinal party affiliation variable
-#' party_pol <- calc_association(data = toydata, value_1 = att_val, value_2 = party_val, r_or_r2 = "r", by = c("att_name", "group", "year"))
+#' party_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_val, r_or_r2 = "r", by = c("att_name", "group", "year"))
 #'
 #' # Partisan polarization using unordered party categories and no groups
-#' multiparty_pol <- calc_association(data = toydata, value_1 = att_val, value_2 = party_val, r_or_r2 = "r2")
+#' multiparty_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_val, r_or_r2 = "r2")
 #'
 #' # Ideological polarization using the Pearson correlation between attitude pairs and no groups
 #' paired_toydata <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = other_keys = c("id", "group", "year"))
-#' ideology_pol <- calc_association(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r")
+#' ideology_pol <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r")
 #'
 #' # Ideological polarization grouping the coefficient of determination by attitude pair
-#' ideology_pol2 <- calc_association(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r2", by = c("att_name1", "att_name2"))
+#' ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r2", by = c("att_name1", "att_name2"))
 #'
 #' @export
 #'
@@ -72,7 +72,7 @@ polarize_assoc <- function(
   # Function to iterate over "by" groups,
   # calculating the association betwen values using syntax
   # compatible with functions related to the survey R package
-  correlate_values <- function(
+  calc_association <- function(
     data,
     col1 = value_1,
     col2 = value_2
@@ -154,7 +154,7 @@ polarize_assoc <- function(
     tidytable::mutate(
       assoc_list = tidytable::map(
         design_list,
-        correlate_values
+        calc_association
       )
     )
 

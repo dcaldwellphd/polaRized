@@ -30,6 +30,7 @@
 #' @importFrom srvyr as_survey_design
 #' @importFrom tidyselect any_of
 #' @importFrom dplyr select filter nest_by across mutate rename_with
+#' @importFrom agrmt agreement polarization Leik consensus entropy BerryMielke BlairLacy Kvalseth lsquared dsquared MRQ
 
 polarize_distr <- function(
     data,
@@ -55,7 +56,7 @@ polarize_distr <- function(
   # Function to iterate over "by" groups,
   # calculating the association betwen values using syntax
   # compatible with functions related to the survey R package
-  distribute_values <- function(
+  calc_distribution <- function(
     data,
     col = value
     ) {
@@ -81,8 +82,24 @@ polarize_distr <- function(
       distr <- svykurt(
         fmla, design = data, na.rm = TRUE
         )
-    } else if (measure == "extremism") {
-      distr <- survey::svytable(fmla, design = data)
+    } else if (measure == "prop_extremism") {
+      distr <- svyprop_extrmism(
+        fmla, design = data, na.rm = TRUE
+        )
+    } else if (
+      measure %in% c(
+        "agreement", "polarization", "Leik", "consensus",
+        "entropy", "BerryMielke", "BlairLacy", "Kvalseth",
+        "lsquared", "dsquared", "MRQ"
+        )
+    ) {
+      distr <- survey::svytable(
+        fmla, design = data, round = ifelse(
+          measure == "consensus", TRUE, FALSE
+          )
+        )
+    } else {
+      stop("Unrecognized measure argument")
     }
 
     return(distr)
@@ -131,68 +148,85 @@ polarize_distr <- function(
     tidytable::mutate(
       distr_list = tidytable::map(
         design_list,
-        distribute_values
+        calc_distribution
       )
-      )
-
-  if (measure == "extremism") {
-    unnested_distr <- nested_distr |>
-      unnest_wider(distr_list, names_sep = "_") |>
-      pivot_longer(
-        cols = contains("distr_list_"),
-        names_to = "r_option",
-        values_to = "freq"
-        ) |>
-      mutate(
-        r_option = str_remove(r_option, "distr_list_"),
-        r_option = as.numeric(r_option)
-        ) |>
-      drop_na(freq) |>
-      select(-data, -design_list) |>
-      nest_by(across(any_of(by))) |>
-
-  }
-}
+      ) |>
+    select(-data, -design_list)
 
   if (measure == "median") {
-    unnested_distr <- mutate(
-      nested_distr,
-      quants = map(
+    unnested_distr <- nested_distr |>
+      mutate(
+        quants = map(
         distr_list,
         `[[`,
         value
         ),
       value = map(quants, `[`, 2)
       ) |>
-      select(-quants)
+      select(-quants, -distr_list)
   } else if (measure == "iqr") {
-    unnested_distr <- mutate(
-      nested_distr,
-      quants = map(
-        distr_list,
-        `[[`,
-        value
-      ),
-      q1 = as.numeric(map(quants, `[`, 1)),
-      q3 = as.numeric(map(quants, `[`, 3)),
-      value = q3 - q1
-      ) |>
-      select(-quants, -q1, -q3)
-
+    unnested_distr <- nested_distr |>
+      mutate(
+        quants = map(
+          distr_list,
+          `[[`,
+          value
+          ),
+        q1 = as.numeric(map(quants, `[`, 1)),
+        q3 = as.numeric(map(quants, `[`, 3)),
+        value = q3 - q1
+        ) |>
+      select(
+        -quants, -q1, -q3, -distr_list
+        )
+  } else if (
+    measure %in% c(
+      "mean", "sd", "kurtosis", "prop_extremism"
+      )
+    ) {
+    unnested_distr <- nested_distr |>
+      mutate(
+        value = unlist(distr_list)
+        ) |>
+      select(-distr_list)
   } else {
-    unnested_distr <- mutate(
-      nested_distr,
-      value = unlist(distr_list)
+
+    agrmt_lookup <- list(
+      "agreement" = agrmt::agreement,
+      "polarization" = agrmt::polarization,
+      "Leik" = agrmt::Leik,
+      "consensus" = agrmt::consensus,
+      "entropy" = agrmt::entropy,
+      "BerryMielke" = agrmt::BerryMielke,
+      "BlairLacy" = agrmt::BlairLacy,
+      "Kvalseth" = agrmt::Kvalseth,
+      "lsquared" = agrmt::lsquared,
+      "dsquared" = agrmt::dsquared,
+      "MRQ" = agrmt::MRQ
     )
+    agrmt_func <- agrmt_lookup[[measure]]
+
+    unnested_distr <- nested_distr |>
+      unnest_wider(col = distr_list) |>
+      pivot_longer(
+        cols = -c(any_of(by)),
+        names_to = "response",
+        values_to = "freq"
+        ) |>
+      drop_na(freq) |>
+      summarise(
+        value = agrmt_func(freq),
+        .by = any_of(by)
+      )
   }
 
-  output <- unnested_distr |>
-    dplyr::rename_with(
-      ~ paste0("value_", measure, recycle0 = TRUE),
-      value
-      ) |>
-    select(-data, -design_list, -distr_list)
-
+  output <- dplyr::rename_with(
+    unnested_distr,
+    ~ paste0(
+      value, "_", measure, recycle0 = TRUE
+      ),
+    value
+    )
 
   return(output)
 

@@ -33,6 +33,10 @@ svykurt <- function(
   if (!inherits(design, "survey.design"))
     stop("design is not a survey design")
 
+  # Storing variable in formula as string
+  # This is necessary to construct the svyciprop formula below
+  var_name <- as.character(x)[2]
+
   x <- model.frame(x, design$variables, na.action = na.pass)
   x <- as.matrix(x)
 
@@ -43,21 +47,59 @@ svykurt <- function(
     x <- x[!is.na(x)]
   }
 
-  pweights <- 1/design$prob
-  psum <- sum(pweights)
-  mean_x <- svymean(x, design, na.rm = na.rm)
-  var_x <- svyvar(x, design, na.rm = na.rm)
+  momnts_fmla <- paste0(
+    "~",
+    var_name,
+    " + I(",
+    var_name,
+    "^2) + I(",
+    var_name,
+    "^3) + I(",
+    var_name,
+    "^4)")
 
-  m4 <- sum(pweights * (x - mean_x)^4) / psum
-  kurt <- m4 / var_x^2
+  momnts <- svymean(
+    as.formula(momnts_fmla),
+    design,
+    na.rm = na.rm
+    )
 
-  if (excess) {
-    kurt <- kurt - 3
-  }
 
-  class(kurt) <- "svykurt"
 
-  return(kurt)
+  mu4_fmla <- paste0(
+    "mu4 = quote(-3 * ",
+    var_name,
+    "^4 + 6 * ",
+    var_name,
+    "^2 * `I(",
+    var_name,
+    "^2)` - 4 * ",
+    var_name,
+    " * `I(",
+    var_name,
+    "^3)` + `I(",
+    var_name,
+    "^4)`)"
+  )
+
+  sigma2_flma <- paste0(
+    "sigma2 = quote(`I(",
+    var_name,
+    "^2)` - ",
+    var_name,
+    "^2)"
+  )
+
+
+  centrl_momnts <- svycontrast(
+    momnts,
+    list(
+      mu4_fmla,
+      sigma2_flma
+      )
+    )
+
+  return(centrl_momnts)
 
 }
 

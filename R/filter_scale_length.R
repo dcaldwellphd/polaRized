@@ -2,8 +2,8 @@
 
 filter_scale_length <- function(
     data,
-    name_key,
-    value_key,
+    scale_names,
+    scale_values,
     min_scale_length = 4
     ) {
 
@@ -16,15 +16,14 @@ filter_scale_length <- function(
 
   meets_min_scale <- data |>
     summarise(
-      value_key_length = scale_length({{ value_key }}),
-      .by = {{ name_key }}
+      scale_lengths = scale_length({{ scale_values }}),
+      .by = {{ scale_names }}
       ) |>
-    filter(value_key_length >= min_scale_length) |>
-    select({{ name_key }})
+    filter(scale_lengths >= min_scale_length) |>
+    pull({{ scale_names }})
 
-  output <- inner_join(
-    data, meets_min_scale, by = {{ name_key }}
-    )
+  output <- data %>%
+    filter({{ scale_names }} %in% meets_min_scale)
 
   return(output)
 

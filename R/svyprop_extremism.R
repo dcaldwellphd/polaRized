@@ -25,8 +25,6 @@
 #' @return An object of class \code{svyciprop} giving the proportion and its confidence interval
 #'
 #' @examples
-#' if (requireNamespace("survey")) {
-#'  library(survey)
 #'  data(toydata)
 #' # Create survey design object
 #' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)

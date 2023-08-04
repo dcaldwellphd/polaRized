@@ -20,11 +20,10 @@
 #'
 #' @export
 #'
-#' @importFrom survey svymean svyvar
-
+#' @importFrom survey svymean svycontrast
 
 svykurt <- function(
-    x,
+    formula,
     design,
     na.rm = FALSE,
     excess = TRUE
@@ -33,38 +32,49 @@ svykurt <- function(
   if (!inherits(design, "survey.design"))
     stop("design is not a survey design")
 
-  x <- model.frame(x, design$variables, na.action = na.pass)
-  x <- as.matrix(x)
+  var_name <- as.character(formula[[2]])
+  moments_char <- paste0("I(", var_name, "^", 1:4, ")")
+  moments_formula <- make.formula(moments_char)
 
-  if (ncol(x) > 1)
-    stop("Only calculate kurtosis one variable at a time")
+  moments <- svymean(moments_formula, design, na.rm = na.rm)
 
-  if(na.rm){
-    x <- x[!is.na(x)]
-  }
+  mu4expr <- substitute(
+    -3 * one^4 + 6 * one^2 * two - 4 * one * three + four,
+    list(
+      one = as.name(moments_char[1]),
+      two = as.name(moments_char[2]),
+      three = as.name(moments_char[3]),
+      four = as.name(moments_char[4])
+    )
+  )
 
-  pweights <- 1/design$prob
-  psum <- sum(pweights)
-  mean_x <- svymean(x, design, na.rm = na.rm)
-  var_x <- svyvar(x, design, na.rm = na.rm)
+  sigma2expr <- substitute(
+    two - one^2,
+    list(
+      one = as.name(moments_char[1]),
+      two=as.name(moments_char[2])
+    )
+  )
 
-  m4 <- sum(pweights * (x - mean_x)^4) / psum
-  kurt <- m4 / var_x^2
+  central_moments <- svycontrast(
+    moments,
+    list(
+      mu4 = mu4expr,
+      sigma2 = sigma2expr
+    )
+  )
+
+  kurt <- svycontrast(central_moments, quote(mu4 / (sigma2 * sigma2)))
 
   if (excess) {
     kurt <- kurt - 3
   }
 
-  class(kurt) <- "svykurt"
+  attr(kurt, "statistic") <- "kurtosis"
+  attr(kurt, "names") <- var_name
+
 
   return(kurt)
 
 }
 
-print.svykurt <- function(x) {
-  m <- as.matrix(x, ncol = 1)
-  rownames(m) <- names(x)
-  colnames(m) <- "kurtosis"
-
-  print(m)
-}

@@ -21,9 +21,7 @@
 #' @return A data frame object containing the distributional measure of polarization.
 #' 
 #' @detals
-#' This function is a one-stop-shop for distributional measures of polarization. It is useful when you want to summarise a large number of attitude distributions at once.
-#' 
-#' The function designed to work with the \code{survey} package, allowing the incorporation of complex survey design features into the estimation of distributional measures of polarization. This was previously inconvenient when working with large numbers of attitude items simultaneously, as the \code{survey} package requires the user to specify the variable name in a formula. The function allows the user to specify variable names and any other grouping infomration in the \code{by} argument, which are used to nest attitude item responses and apply functions related to the \code{survey} package.
+#' This function is a one-stop-shop for distributional measures of polarization. It is designed around the \code{survey} package, allowing the incorporation of complex survey design features into the estimation of common distributional measures of polarization. It is useful when you want to summarise a large number of attitude distributions at once. This was previously less convenient, as the \code{survey} package requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_distr} will automatically nest the data and apply various functions related to the \code{survey} package.
 #' 
 #' The following values are currently accepted by the \code{measure} argument:
 #' \itemize{
@@ -32,7 +30,7 @@
 #' \item \code{"iqr"}: Interquartile range of the distribution, using \code{survey::svyquantile}
 #' \item \code{"sd"}: Standard deviation of the distribution, using \code{jtools::svysd}, which is a wrapper around \code{survey::svyvar}
 #' \item \code{"kurtosis"}: Kurtosis of the distribution, using the \code{svykurt} function implemented in this package
-#' \item \code{"prop_extremism"}: Proportion of respondents who are extreme on the distribution, using the \code{svyprop_extremism} function implemented in this package.
+#' \item \code{"extremism"}: Proportion of respondents who are extreme on the distribution, using the \code{svyextremism} function implemented in this package.
 #' \item And these methods for estimating disagreement on ordered rating scales from the \code{agrmt} package, each of which are run on frequency vectors created using \code{survey::svytable}: \code{"agreement"}, \code{"polarization"}, \code{"Leik"}, \code{"consensus"}, \code{"entropy"}, \code{"BerryMielke"}, \code{"BlairLacy"}, \code{"Kvalseth"}, \code{"lsquared"}, \code{"dsquared"}, \code{"MRQ"}, \code{"concentration"}, \code{"dispersion"}, and \code{"Reardon"}. See \code{\link[agrmt]{agreement}} for more details.}
 #' 
 #' @return A data frame object containing the distributional measure applied to the \code{value} column.
@@ -49,7 +47,7 @@
 #' att_sd <- polarize_distr(data = toydata_l, value = att_val, measure = "sd", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
 #' att_iqr <- polarize_distr(data = toydata_l, value = att_val, measure = "iqr", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
 #' att_kurt <- polarize_distr(data = toydata_l, value = att_val, measure = "kurtosis", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
-#' att_extremism <- polarize_distri(data = toydata_l, value = att_val, measure = "prop_extremism", by = c("att_name", "group", "time"))
+#' att_extremism <- polarize_distri(data = toydata_l, value = att_val, measure = "extremism", by = c("att_name", "group", "time"))
 #' 
 #' # Using measures of ordinal disgreement from the agrmt package
 #' att_agreement <- polarize_distr(data = toydata_l, value = att_val, measure = "agreement", by = c("att_name", "group", "time"))
@@ -129,7 +127,7 @@ polarize_distr <- function(
 
     if (measure == "mean") {
       distr <- survey::svymean(
-        fmla, design = data, na.rm = TRUE
+        fmla, design = data
         )
     } else if (
       measure == "median" | measure == "iqr"
@@ -141,15 +139,15 @@ polarize_distr <- function(
         )
     } else if (measure == "sd") {
       distr <- jtools::svysd(
-        fmla, design = data, na.rm = TRUE
+        fmla, design = data
         )
     } else if (measure == "kurtosis") {
       distr <- svykurt(
-        fmla, design = data, na.rm = TRUE
+        fmla, design = data
         )
-    } else if (measure == "prop_extremism") {
-      distr <- svyprop_extrmism(
-        fmla, design = data, na.rm = TRUE
+    } else if (measure == "extremism") {
+      distr <- svyextremism(
+        fmla, design = data
         )
     } else if (measure %in% names(agrmt_lookup)) {
       distr <- survey::svytable(
@@ -158,7 +156,7 @@ polarize_distr <- function(
           )
         )
     } else {
-      stop("Unrecognized measure argument")
+      stop("Unrecognized measure argument.")
     }
 
     return(distr)
@@ -250,7 +248,7 @@ polarize_distr <- function(
         )
   } else if (
     measure %in% c(
-      "mean", "sd", "kurtosis", "prop_extremism"
+      "mean", "sd", "kurtosis", "extremism"
       )
     ) {
     unnested_distr <- nested_distr |>

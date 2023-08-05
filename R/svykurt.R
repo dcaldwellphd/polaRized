@@ -1,22 +1,27 @@
 #' @title svykurt
 #'
-#' @description Calculates Pearson kurtosis with complex survey data
+#' @description Calculates kurtosis with complex survey data
 #'
-#' @param x A formula (e.g., ~var1) specifying the variable on which to estimate kurtosis.
+#' @param formula A formula (e.g., ~var1) specifying the variable on which to estimate kurtosis.
 #' @param design The \code{survey.design} or \code{svyrep.design} object.
 #' @param na.rm Logical. Should cases with missing values be dropped?
 #' @param excess Logical. The default (TRUE) subtracts 3 from the output, giving excess kurtosis.
+#' 
+#' @details
+#' This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It uses \code{svymean} to calculate the first four moments, and then transforms these into kurtosis using \code{svycontrast}.
 #'
-#' @return An object of class \code{svykurt} giving the kurtosis on x
+#' @return An object of class \code{svrepstat} giving the kurtosis its standard error.
+#' 
+#' @seealso [`svymean()`][survey::svymean], [`svycontrast()`][survey::svycontrast]
+
+#' @note The approach used in this function is based on guidance from Thomas Lumley, the \code{survey} package's author (see {https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package}{here} and {https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i}{here}).
 #'
 #' @examples
-#' if (requireNamespace("survey")) {
-#'  library(survey)
 #'  data(toydata)
 #' # Create survey design object
 #' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
 #' # Print the excess kurtosis of a variable
-#' svykurt(x = ~att_5, design = toydesign)
+#' svykurt(formula = ~att_5, design = toydesign)
 #'
 #' @export
 #'

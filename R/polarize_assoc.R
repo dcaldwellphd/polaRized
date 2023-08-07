@@ -21,17 +21,25 @@
 #' @return A data frame object containing the measure of association between two sets of values.
 #' 
 #' @details 
-#' This function implements two prominent approaches to estimating polarization as the association between two sets of values, such as attitudes and partisanship. In a mostly US-dominated literature, the established approach is to use the Pearson correlation between an ordinal or binary attitude item and an ordinal measure of partisanship (e.g., Baldassarri and Gelman 2008). This approach is implemented by setting the \code{r_or_r2} argument to "r", returing the Pearson correlation between two value columns of class \code{numeric}.
+#' This function implements two prominent approaches to estimating polarization as the association between two sets of values, such as attitudes and partisanship. In a mostly US-dominated literature, the established approach is to use the Pearson correlation between an ordinal or binary attitude item and an ordinal measure of partisanship (e.g., Baldassarri and Gelman 2008). This approach is implemented by setting the \code{r_or_r2} argument to "r", returing the Pearson correlation between the two value columns.
 #' 
-#' The second approach is to use the $R^2$ or adjusted $R^2$ from OLS model predicting values supplied to the \code{value_1} argument from values supplied to the \code{value_2} argument, including categorical predictors (such as unordered multiparty values). This approach is implemented by setting the \code{r_or_r2} argument to "r2", returning the $R^2$ and adjusted $R^2$ corresponding to square of the correlation between observed and predicted outcomes (see Caldwell, Cohen, and Vivyan 2023).
+#' The second approach is to use the $R^2$ or adjusted $R^2$ from OLS models predicting values supplied to the \code{value_1} argument from values supplied to the \code{value_2} argument, which can include categorical predictors such as unordered multiparty values. This approach is implemented by setting the \code{r_or_r2} argument to "r2", returning $R^2$ and adjusted $R^2$ statistics corresponding to square of the correlation between observed and predicted outcomes (see Caldwell, Cohen, and Vivyan 2023).
 #' 
-#' The function is useful when you want to calculate associational measures of polarization over multiple variables or groups, such as attitude items nested in survey waves. It is designed to work with the \code{survey} package, allowing the incorporation of complex survey design features. This was previously inconvenient when working with large numbers of attitude items simultaneously, as the \code{survey} package requires the user to specify the variable name in a formula. The function allows the user to specify variable names and any other grouping information in the \code{by} argument, which are used to nest attitude item responses and apply functions related to the \code{survey} package.
+#' The function is useful when you want to calculate associational measures of polarization over multiple variables or groups, such as attitude items nested in survey waves. It is designed to work with the \code{survey} package, allowing the incorporation of complex survey design features. This was previously less convenient when working with large numbers of attitude items simultaneously, as the \code{survey} package requires the user to specify the variable name in a formula. The function allows the user to specify variable names and any other grouping information in the \code{by} argument, which are used to nest attitude item responses and apply functions related to the \code{survey} package.
 #' 
 #' In the case where \code{r_or_r2} is set to "r2", the function will automatically fit an OLS regression model of class \code{svyglm} (see \code{\link[survey]{svyglm}} for more details). Values supplied to the \code{value_1} argument will be used as the dependent variable, and values supplied to the \code{value_2} argument will be used as the independent variable. The function will then extract the $R^2$ and adjusted $R^2$ from each model and return them in the output data frame.
 #' 
-#' When \code{r_or_r2} is set to "r", the function uses \code{jtools::svycor} to calculate the Pearson correlation between \code{value_1} and \code{value_2}. \code{jtools::svycor} is a wrapper around 
+#' When \code{r_or_r2} is set to "r", the function uses \code{jtools::svycor} to calculate the Pearson correlation between \code{value_1} and \code{value_2}. The \code{svycor} function is essentially a wrapper around \code{survey::svyvar}. It calculates the variance-covariance matrix of variables supplied to the formula and extracts the correlation coefficient using \code{cov2cor} (see Long 2023).
 #' 
+#' @references
 #' 
+#' Baldassarri and Gelman 2008
+#' 
+#' Caldwell, Cohen, and Vivyan 2023
+#' 
+#' Long, J. (2023). \emph{Calculate correlations and correlation tables with complex survey data}. Retrieved from \url{https://cran.r-project.org/web/packages/jtools/vignettes/svycor.html}
+#' 
+#' @note
 #'
 #' @examples
 #' data(toydata)
@@ -91,20 +99,14 @@ polarize_assoc <- function(
     col1 = value_1,
     col2 = value_2
     ) {
-    if (r_or_r2 == "r") {
-      if (
-        !is.numeric(value_1_eval) | !is.numeric(value_2_eval)
-        ) {
-        stop(
-          "Pearson correlations require two value columns of class numeric."
-        )
-      }
-
+      
+      if (r_or_r2 == "r") {
+  
       fmla <- as.formula(paste0("~", col1, " + ", col2))
       assoc <- jtools::svycor(fmla, design = data)
 
       return(assoc)
-
+      
       } else if (r_or_r2 == "r2") {
 
       fmla <- as.formula(paste0(col1, "~", col2))

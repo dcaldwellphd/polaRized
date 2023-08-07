@@ -38,7 +38,7 @@
 #' @examples
 #' data(toydata)
 #' # Filter attitude items with a length of unique values above 3
-#' toydata_l <- filter_scale_length(toydata, scale_names = att_name, scale_values = att_val)
+#' toydata_l <- filter_scale_length(toydata_l, scale_names = att_name, scale_values = att_val)
 #' # Describing the central tendency of distributions surrounding attitude items
 #' att_means <- polarize_distr(data = toydata_l, value = att_val, measure = "mean", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
 #' att_medians <- polarize_distr(data = toydata_l, value = att_val, measure = "median", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)

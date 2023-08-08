@@ -17,11 +17,9 @@
 #' @param weights Variables specifying weights (inverse of probability).
 #' @param pps "brewer" to use Brewer's approximation for PPS sampling without replacement. "overton" to use Overton's approximation. An object of class HR to use the Hartley-Rao approximation. An object of class ppsmat to use the Horvitz-Thompson estimator.
 #' @param variance For pps without replacement, use variance="YG" for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator.
-#'
-#' @return A data frame object containing the distributional measure of polarization.
 #' 
-#' @detals
-#' This function is a one-stop-shop for distributional measures of polarization. It is designed around the \code{survey} package, allowing the incorporation of complex survey design features into the estimation of common distributional measures of polarization. It is useful when you want to summarise a large number of attitude distributions at once. This was previously less convenient, as the \code{survey} package requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_distr} will automatically nest the data and apply various functions related to the \code{survey} package.
+#' @details
+#' This function is a one-stop-shop for distributional measures of polarization. It is designed around the \code{survey} package, allowing the incorporation of complex survey design features. It is useful when you want to summarise a large number of attitude distributions at once. This was previously less convenient, as the \code{survey} package requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_distr} will automatically nest the data and apply functions related to the \code{survey} package.
 #' 
 #' The following values are currently accepted by the \code{measure} argument:
 #' \itemize{
@@ -31,39 +29,40 @@
 #' \item \code{"sd"}: Standard deviation of the distribution, using \code{jtools::svysd}, which is a wrapper around \code{survey::svyvar}
 #' \item \code{"kurtosis"}: Kurtosis of the distribution, using the \code{svykurt} function implemented in this package
 #' \item \code{"extremism"}: Proportion of respondents who are extreme on the distribution, using the \code{svyextremism} function implemented in this package.
-#' \item And these methods for estimating disagreement on ordered rating scales from the \code{agrmt} package, each of which are run on frequency vectors created using \code{survey::svytable}: \code{"agreement"}, \code{"polarization"}, \code{"Leik"}, \code{"consensus"}, \code{"entropy"}, \code{"BerryMielke"}, \code{"BlairLacy"}, \code{"Kvalseth"}, \code{"lsquared"}, \code{"dsquared"}, \code{"MRQ"}, \code{"concentration"}, \code{"dispersion"}, and \code{"Reardon"}. See \code{\link[agrmt]{agreement}} for more details.}
+#' \item And these methods for estimating consensus and disagreement on ordered rating scales from the \code{agrmt} package, each of which are run on frequency vectors created using \code{survey::svytable}: \code{"agreement"}, \code{"polarization"}, \code{"Leik"}, \code{"consensus"}, \code{"entropy"}, \code{"BerryMielke"}, \code{"BlairLacy"}, \code{"Kvalseth"}, \code{"lsquared"}, \code{"dsquared"}, \code{"MRQ"}, \code{"concentration"}, \code{"dispersion"}, and \code{"Reardon"}. See \code{\link[agrmt]{agreement}} for more details.}
 #' 
 #' @return A data frame object containing the distributional measure applied to the \code{value} column.
 #'
 #' @examples
 #' data(toydata)
 #' # Filter attitude items with a length of unique values above 3
-#' toydata_l <- filter_scale_length(toydata_l, scale_names = att_name, scale_values = att_val)
+#' filtered_toydata <- filter_scale_length(toydata_l, scale_names = att_name, scale_values = att_val)
+#' 
 #' # Describing the central tendency of distributions surrounding attitude items
-#' att_means <- polarize_distr(data = toydata_l, value = att_val, measure = "mean", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
-#' att_medians <- polarize_distr(data = toydata_l, value = att_val, measure = "median", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_means <- polarize_distr(data = filtered_toydata, value = att_val, measure = "mean", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_medians <- polarize_distr(data = filtered_toydata, value = att_val, measure = "median", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
 #' 
 #' # Describing the dispersion of distributions surrounding attitude items
-#' att_sd <- polarize_distr(data = toydata_l, value = att_val, measure = "sd", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
-#' att_iqr <- polarize_distr(data = toydata_l, value = att_val, measure = "iqr", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
-#' att_kurt <- polarize_distr(data = toydata_l, value = att_val, measure = "kurtosis", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
-#' att_extremism <- polarize_distri(data = toydata_l, value = att_val, measure = "extremism", by = c("att_name", "group", "time"))
+#' att_sd <- polarize_distr(data = filtered_toydata, value = att_val, measure = "sd", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_iqr <- polarize_distr(data = filtered_toydata, value = att_val, measure = "iqr", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_kurt <- polarize_distr(data = filtered_toydata, value = att_val, measure = "kurtosis", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_extremism <- polarize_distri(data = filtered_toydata, value = att_val, measure = "extremism", by = c("att_name", "group", "time"))
 #' 
 #' # Using measures of ordinal disgreement from the agrmt package
-#' att_agreement <- polarize_distr(data = toydata_l, value = att_val, measure = "agreement", by = c("att_name", "group", "time"))
-#' att_polarization <- polarize_distr(data = toydata_l, value = att_val, measure = "polarization", by = c("att_name", "group", "time"))
-#' att_Leik <- polarize_distr(data = toydata_l, value = att_val, measure = "Leik", by = c("att_name", "group", "time"))
-#' att_consensus <- polarize_distr(data = toydata_l, value = att_val, measure = "consensus", by = c("att_name", "group", "time"))
-#' att_entropy <- polarize_distr(data = toydata_l, value = att_val, measure = "entropy", by = c("att_name", "group", "time"))
-#' att_BerryMielke <- polarize_distr(data = toydata_l, value = att_val, measure = "BerryMielke", by = c("att_name", "group", "time"))
-#' att_BlairLacy <- polarize_distr(data = toydata_l, value = att_val, measure = "BlairLacy", by = c("att_name", "group", "time"))
-#' att_Kvalseth <- polarize_distr(data = toydata_l, value = att_val, measure = "Kvalseth", by = c("att_name", "group", "time"))
-#' att_lsquared <- polarize_distr(data = toydata_l, value = att_val, measure = "lsquared", by = c("att_name", "group", "time"))
-#' att_dsquared <- polarize_distr(data = toydata_l, value = att_val, measure = "dsquared", by = c("att_name", "group", "time"))
-#' att_MRQ <- polarize_distr(data = toydata_l, value = att_val, measure = "MRQ", by = c("att_name", "group", "time"))
-#' att_concentration <- polarize_distr(data = toydata_l, value = att_val, measure = "concentration", by = c("att_name", "group", "time"))
-#' att_dispersion <- polarize_distr(data = toydata_l, value = att_val, measure = "dispersion", by = c("att_name", "group", "time"))
-#' att_Reardon <- polarize_distr(data = toydata_l, value = att_val, measure = "Reardon", by = c("att_name", "group", "time"))
+#' att_agreement <- polarize_distr(data = filtered_toydata, value = att_val, measure = "agreement", by = c("att_name", "group", "time"))
+#' att_polarization <- polarize_distr(data = filtered_toydata, value = att_val, measure = "polarization", by = c("att_name", "group", "time"))
+#' att_Leik <- polarize_distr(data = filtered_toydata, value = att_val, measure = "Leik", by = c("att_name", "group", "time"))
+#' att_consensus <- polarize_distr(data = filtered_toydata, value = att_val, measure = "consensus", by = c("att_name", "group", "time"))
+#' att_entropy <- polarize_distr(data = filtered_toydata, value = att_val, measure = "entropy", by = c("att_name", "group", "time"))
+#' att_BerryMielke <- polarize_distr(data = filtered_toydata, value = att_val, measure = "BerryMielke", by = c("att_name", "group", "time"))
+#' att_BlairLacy <- polarize_distr(data = filtered_toydata, value = att_val, measure = "BlairLacy", by = c("att_name", "group", "time"))
+#' att_Kvalseth <- polarize_distr(data = filtered_toydata, value = att_val, measure = "Kvalseth", by = c("att_name", "group", "time"))
+#' att_lsquared <- polarize_distr(data = filtered_toydata, value = att_val, measure = "lsquared", by = c("att_name", "group", "time"))
+#' att_dsquared <- polarize_distr(data = filtered_toydata, value = att_val, measure = "dsquared", by = c("att_name", "group", "time"))
+#' att_MRQ <- polarize_distr(data = filtered_toydata, value = att_val, measure = "MRQ", by = c("att_name", "group", "time"))
+#' att_concentration <- polarize_distr(data = filtered_toydata, value = att_val, measure = "concentration", by = c("att_name", "group", "time"))
+#' att_dispersion <- polarize_distr(data = filtered_toydata, value = att_val, measure = "dispersion", by = c("att_name", "group", "time"))
+#' att_Reardon <- polarize_distr(data = filtered_toydata, value = att_val, measure = "Reardon", by = c("att_name", "group", "time"))
 #'
 #' @export
 #'

@@ -17,43 +17,37 @@
 #' @param weights Variables specifying weights (inverse of probability).
 #' @param pps "brewer" to use Brewer's approximation for PPS sampling without replacement. "overton" to use Overton's approximation. An object of class HR to use the Hartley-Rao approximation. An object of class ppsmat to use the Horvitz-Thompson estimator.
 #' @param variance For pps without replacement, use variance="YG" for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator.
-#'
-#' @return A data frame object containing the measure of association between two sets of values.
 #' 
 #' @details 
-#' This function implements two prominent approaches to estimating polarization as the association between two sets of values, such as attitudes and partisanship. In a mostly US-dominated literature, the established approach is to use the Pearson correlation between an ordinal or binary attitude item and an ordinal measure of partisanship (e.g., Baldassarri and Gelman 2008). This approach is implemented by setting the \code{r_or_r2} argument to "r", returing the Pearson correlation between the two value columns.
+#' This function implements two prominent associational measures of polarization. It is designed around the \code{survey} package, allowing the incorporation of complex survey design features. It is useful when you want to calculate associational measures of polarization over a large number of attitude items. This was previously less convenient in the \code{survey} package, which requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_assoc} will automatically nest the data and apply functions related to the \code{survey} package.
 #' 
-#' The second approach is to use the $R^2$ or adjusted $R^2$ from OLS models predicting values supplied to the \code{value_1} argument from values supplied to the \code{value_2} argument, which can include categorical predictors such as unordered multiparty values. This approach is implemented by setting the \code{r_or_r2} argument to "r2", returning $R^2$ and adjusted $R^2$ statistics corresponding to square of the correlation between observed and predicted outcomes (see Caldwell, Cohen, and Vivyan 2023).
+#'  When \code{r_or_r2} is set to "r", \code{jtools::svycor} is used to calculate the Pearson correlation between \code{value_1} and \code{value_2}. The \code{svycor} function is essentially a wrapper around \code{survey::svyvar}. It calculates the variance-covariance matrix of variables supplied to the formula and extracts the correlation coefficient using \code{cov2cor} (see Long 2023).
 #' 
-#' The function is useful when you want to calculate associational measures of polarization over multiple variables or groups, such as attitude items nested in survey waves. It is designed to work with the \code{survey} package, allowing the incorporation of complex survey design features. This was previously less convenient when working with large numbers of attitude items simultaneously, as the \code{survey} package requires the user to specify the variable name in a formula. The function allows the user to specify variable names and any other grouping information in the \code{by} argument, which are used to nest attitude item responses and apply functions related to the \code{survey} package.
-#' 
-#' In the case where \code{r_or_r2} is set to "r2", the function will automatically fit an OLS regression model of class \code{svyglm} (see \code{\link[survey]{svyglm}} for more details). Values supplied to the \code{value_1} argument will be used as the dependent variable, and values supplied to the \code{value_2} argument will be used as the independent variable. The function will then extract the $R^2$ and adjusted $R^2$ from each model and return them in the output data frame.
-#' 
-#' When \code{r_or_r2} is set to "r", the function uses \code{jtools::svycor} to calculate the Pearson correlation between \code{value_1} and \code{value_2}. The \code{svycor} function is essentially a wrapper around \code{survey::svyvar}. It calculates the variance-covariance matrix of variables supplied to the formula and extracts the correlation coefficient using \code{cov2cor} (see Long 2023).
+#' When \code{r_or_r2} is set to "r2", the function fits OLS regression models using \code{survey::svyglm}. The column supplied to \code{value_1} will be used as the dependent variable and the column supplied to \code{value_2} will be the independent variable. The direction of this relationship makes no difference in practice, however. The $R^2$ and adjusted $R^2$ are extracted from each model and returned as the output, giving the square of the correlation between observed and predicted outcomes. These statistics are similar to squaring the Pearson correlation between two variables, only the regression framework allows for the incorporation of categorical predictors, such as unordered party values (see Caldwell, Cohen, and Vivyan 2023).
 #' 
 #' @references
 #' 
-#' Baldassarri and Gelman 2008
-#' 
-#' Caldwell, Cohen, and Vivyan 2023
+#' Caldwell, D.,  Cohen, C. and Vivyan, N. (2023). Long-Run Trends in Political Polarization of Climate Policy-Relevant Attitudes Across Countries. \emph{Working Paper}.
 #' 
 #' Long, J. (2023). \emph{Calculate correlations and correlation tables with complex survey data}. Retrieved from \url{https://cran.r-project.org/web/packages/jtools/vignettes/svycor.html}
 #' 
-#' @note
+#' @seealso [`svycor()`][jtools::svycor], [`svyglm()`][survey::svyglm]
+#' 
+#' @return A data frame object containing the measure of association between two sets of values.
 #'
 #' @examples
 #' data(toydata)
 #' # Partisan polarization using Pearson correlation between attitude item and ordinal party affiliation variable
-#' party_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_val, r_or_r2 = "r", by = c("att_name", "group", "year"))
+#' party_pol <- polarize_assoc(data = toydata_l, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c("att_name", "group", "time"))
 #'
 #' # Partisan polarization using unordered party categories and no groups
-#' multiparty_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_val, r_or_r2 = "r2")
+#' multiparty_pol <- polarize_assoc(data = toydata_l, value_1 = att_val, value_2 = party_cat, r_or_r2 = "r2")
 #'
 #' # Ideological polarization using the Pearson correlation between attitude pairs and no groups
-#' paired_toydata <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = other_keys = c("id", "group", "year"))
+#' paired_toydata <- spread_pairs(data = toydata_l, name_key = att_name, value_key = att_val, other_keys = c("id", "group", "time"))
 #' ideology_pol <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r")
 #'
-#' # Ideological polarization grouping the coefficient of determination by attitude pair
+#' # Ideological polarization grouping R-squared statistics by attitude pair
 #' ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r2", by = c("att_name1", "att_name2"))
 #'
 #' @export

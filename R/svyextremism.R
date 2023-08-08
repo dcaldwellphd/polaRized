@@ -1,6 +1,6 @@
 #' @title svyextremism
 #'
-#' @description Calculates the proportion of extremism on ordered ratings scales in complex survey data.
+#' @description Calculates the proportion of extremism on ordered ratings scales in complex survey data
 #'
 #' @param formula A formula (e.g., ~var) specifying the variable on which to estimate extremism.
 #' @param design The \code{survey.design} or \code{svyrep.design} object.
@@ -10,7 +10,7 @@
 #' @param df Denominator degrees of freedom. See \code{\link[survey]{svyciprop}} for more details.
 #'
 #' @details
-#' This function wraps around the \code{svyciprop} function from the \code{survey} package. It is like calling \code{svyciprop(~I(variable == value), design), but \code{svyextremism} automatically classifies and measures the proportion of extreme values on ordered ratings scales with different lengths. If the scale has less than 10 (and more than 3) unique values, the function uses its minimum and maximum as extreme values. If the scale has 10 or 11 unique values, extreme values also include the second lowest and highest response categories. If the scale is a feeling thermometer with 100 or 101 unique response categories, the top 20 and bottom 20 unique values are classed as extreme. Calling \code{svyextremism} on any other scale length returns an error. The approach to measuring extremism implemented here is based on previous research into attitude polarization (Adams et al. 2012; Caldwell 2023; Cohen & Cohen 2021), and allows the \code{polarize_distr} function from this package to loop over heterogeneous rataing scales, calculating the proportion of extreme responses.
+#' This function wraps around the \code{svyciprop} function from the \code{survey} package. It is like calling \code{svyciprop(~I(variable == value), design), but \code{svyextremism} automatically classifies and measures the proportion of extreme values on ordered ratings scales with different lengths. If the scale has less than 10 (and more than 3) unique values, the function uses its minimum and maximum as extreme values. If the scale has 10 or 11 unique values, extreme values also include the second lowest and highest response categories. If the scale is a feeling thermometer with 100 or 101 unique response categories, the top 20 and bottom 20 unique values are classed as extreme. Calling \code{svyextremism} on any other scale length returns an error. The approach to measuring extremism implemented here is based on previous research into attitude polarization (Adams et al. 2012; Caldwell 2023; Cohen & Cohen 2021), and allows the \code{polarize_distr} function from this package to loop over heterogeneous rataing scales.
 #'
 #' @references
 #'

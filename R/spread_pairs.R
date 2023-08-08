@@ -1,17 +1,18 @@
 #' @title spread_pairs
 #'
-#' @description Takes name and value keys and spreads across (n = 2) combinations of unique levels in the name column
+#' @description Takes a name key and value key and spreads into unique pairs of observations
 #'
 #' @param data A data set object
 #' @param name_key A column containing name keys
 #' @param value_key A column containing value keys
 #' @param other_keys A character vector of other columns to join by and preserve in the output
 #'
-#' @return A data frame object with name and value keys spread across (n = 2) combinations of unique levels in the name column
+#' @return A data frame object with name and value keys spread across unique pairs of observations
 #'
 #' @examples
 #' data(toydata)
-#' paired_items <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c("id", "cntry", "year"))
+#' paired_items <- spread_pairs(data = toydata_l, name_key = att_name, value_key = att_val, other_keys = c("id", "group", "time"))
+#' 
 #' @export
 #' @importFrom dplyr distinct pull rename select left_join rename_with
 #' @importFrom tidyselect any_of

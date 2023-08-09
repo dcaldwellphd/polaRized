@@ -85,9 +85,9 @@ polarize_assoc <- function(
   value_2_eval <- eval(value_2, data)
   weights <- substitute(weights)
 
-  # Function to iterate over "by" groups,
+  # Function to iterate over groups supplied to by argument,
   # calculating the association betwen values using syntax
-  # compatible with functions related to the survey R package
+  # compatible with functions related to the survey R package.
   calc_association <- function(
     data,
     col1 = value_1,
@@ -95,14 +95,14 @@ polarize_assoc <- function(
     ) {
       
       if (r_or_r2 == "r") {
-  
+      # Syntax for the formula compatible with svycor
       fmla <- as.formula(paste0("~", col1, " + ", col2))
       assoc <- jtools::svycor(fmla, design = data)
 
       return(assoc)
-      
-      } else if (r_or_r2 == "r2") {
 
+      } else if (r_or_r2 == "r2") {
+      # Syntax for the formula compatible with svyglm
       fmla <- as.formula(paste0(col1, "~", col2))
       assoc <- survey::svyglm(fmla, design = data)
       return(summary.lm(assoc))
@@ -135,7 +135,7 @@ polarize_assoc <- function(
       drop_na({{ weights }}) |>
       filter(.data[[weights]] != 0)
   }
-
+  # Creating a separate survey design object for each group level
   nested_assocs <- input |>
     nest_by(across(any_of(by))) |>
     tidytable::mutate(
@@ -153,7 +153,7 @@ polarize_assoc <- function(
         variance = variance
       )
     ) |>
-    # Looping through survey objects to calculate association
+    # Looping through survey design objects to calculate association
     tidytable::mutate(
       assoc_list = tidytable::map(
         design_list,
@@ -162,7 +162,8 @@ polarize_assoc <- function(
     )
 
   if (r_or_r2 == "r") {
-    # Extracting the informative Pearson correlation coefficient from 2*2 matrices
+    # svycor returns a 2*2 matrix named "cors"
+    # Extracting a copy of the correlation between value_1 and value_2 from every cors object
     output <- mutate(
       nested_assocs,
       r = map(
@@ -171,8 +172,7 @@ polarize_assoc <- function(
       )
     )
   } else if (r_or_r2 == "r2") {
-    # Extracting coefficient of determination and
-    # adjusted R-squared from every summary.lm object.
+    # Extracting the R-squared and adjusted R-squared from every summary.lm object
     output <- mutate(
       nested_assocs,
       r2 = map(
@@ -187,7 +187,7 @@ polarize_assoc <- function(
       )
     )
   }
-  
+  # Removing nested data from output
   output <- select(
     output,
     -data, -design_list, -assoc_list

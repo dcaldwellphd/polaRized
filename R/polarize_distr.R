@@ -26,8 +26,10 @@
 #'  \item \code{"mean"}: Mean of the distribution, using \code{survey::svymean}
 #'  \item \code{"median"}: Median of the distribution, using \code{survey::svyquantile}
 #' \item \code{"iqr"}: Interquartile range of the distribution, using \code{survey::svyquantile}
-#' \item \code{"sd"}: Standard deviation of the distribution, using \code{jtools::svysd}, which is a wrapper around \code{survey::svyvar}
-#' \item \code{"kurtosis"}: Kurtosis of the distribution, using the \code{svykurt} function implemented in this package
+#' \item \code{"var"}: Variance of the distribution, using \code{survey::svyvar}
+#' \item \code{"std"}: Standard deviation of the distribution, using \code{jtools::svysd}, which is a wrapper around \code{survey::svyvar}
+#' \item \code{"kurt"}: Kurtosis of the distribution, using the \code{svykurt} function implemented in this package
+#' \item \code{"skew"}: Skewness of the distribution, using the \code{svyskew} function implemented in this package
 #' \item \code{"extremism"}: Proportion of respondents who are extreme on the distribution, using the \code{svyextremism} function implemented in this package.
 #' \item And these methods for estimating consensus and disagreement on ordered rating scales from the \code{agrmt} package, each of which are run on frequency vectors created using \code{survey::svytable}: \code{"agreement"}, \code{"polarization"}, \code{"Leik"}, \code{"consensus"}, \code{"entropy"}, \code{"BerryMielke"}, \code{"BlairLacy"}, \code{"Kvalseth"}, \code{"lsquared"}, \code{"dsquared"}, \code{"MRQ"}, \code{"concentration"}, \code{"dispersion"}, and \code{"Reardon"}. See \code{\link[agrmt]{agreement}} for more details.}
 #' 
@@ -43,9 +45,11 @@
 #' att_medians <- polarize_distr(data = filtered_toydata, value = att_val, measure = "median", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
 #' 
 #' # Describing the dispersion of distributions surrounding attitude items
-#' att_sd <- polarize_distr(data = filtered_toydata, value = att_val, measure = "sd", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_var <- polarize_distr(data = filtered_toydata, value = att_val, measure = "var", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_std <- polarize_distr(data = filtered_toydata, value = att_val, measure = "std", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
 #' att_iqr <- polarize_distr(data = filtered_toydata, value = att_val, measure = "iqr", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
-#' att_kurt <- polarize_distr(data = filtered_toydata, value = att_val, measure = "kurtosis", by = c("att_name", "group", "time"), rescale_0_1 = TRUE)
+#' att_kurt <- polarize_distr(data = filtered_toydata, value = att_val, measure = "kurt", by = c("att_name", "group", "time"))
+#' att_skew <- polarize_distr(data = filtered_toydata, value = att_val, measure = "skew", by = c("att_name", "group", "time"))
 #' att_extremism <- polarize_distri(data = filtered_toydata, value = att_val, measure = "extremism", by = c("att_name", "group", "time"))
 #' 
 #' # Using measures of ordinal disgreement from the agrmt package
@@ -66,7 +70,7 @@
 #'
 #' @export
 #'
-#' @importFrom survey svymean
+#' @importFrom survey svymean svyvar
 #' @importFrom jtools svysd
 #' @importFrom tidyr drop_na
 #' @importFrom tidytable mutate map
@@ -136,12 +140,20 @@ polarize_distr <- function(
           0.25, 0.5, 0.75
           )
         )
-    } else if (measure == "sd") {
+    } else if (measure == "var") {
+      distr <- survey::svyvar(
+        fmla, design = data
+        )
+    } else if (measure == "std") {
       distr <- jtools::svysd(
         fmla, design = data
         )
-    } else if (measure == "kurtosis") {
+    } else if (measure == "kurt") {
       distr <- svykurt(
+        fmla, design = data
+        )
+    } else if (measure == "skew") {
+      distr <- svyskew(
         fmla, design = data
         )
     } else if (measure == "extremism") {
@@ -155,7 +167,7 @@ polarize_distr <- function(
           )
         )
     } else {
-      stop("Unrecognized measure argument.")
+      stop("Unrecognized measure argument!")
     }
 
     return(distr)
@@ -247,7 +259,8 @@ polarize_distr <- function(
         )
   } else if (
     measure %in% c(
-      "mean", "sd", "kurtosis", "extremism"
+      "mean", "var", "std", 
+      "kurt", "skew", "extremism"
       )
     ) {
     unnested_distr <- nested_distr |>

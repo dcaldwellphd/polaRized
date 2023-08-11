@@ -8,11 +8,11 @@
 #' @param excess Logical. The default (TRUE) subtracts 3 from the output, giving excess kurtosis.
 #' 
 #' @details
-#' This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It uses \code{svymean} to get the first four moments, and then transforms these into kurtosis using \code{svycontrast}. Setting \code{excess} to TRUE allows the output to be compared with 0, the excess kurtosis of any univariate normal distribution.
+#' This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It writes the variance and fourth central moment in terms of raw moments and then transorms into kurtosis via \code{svycontrast}. Setting \code{excess} to TRUE allows the output to be compared with 0, the excess kurtosis of any univariate normal distribution.
 #'
 #' @return An object of class \code{svrepstat} giving the kurtosis its standard error.
 #' 
-#' @seealso [`svymean()`][survey::svymean], [`svycontrast()`][survey::svycontrast]
+#' @seealso [`svycontrast()`][survey::svycontrast]
 
 #' @note The approach used in this function is based on guidance from Thomas Lumley, the \code{survey} package's author (see {https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package}{here} and {https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i}{here}).
 #'
@@ -41,13 +41,11 @@ svykurt <- function(
   var_name <- as.character(formula[[2]])
   # Pasting var_name in strings representing moments of the distribution
   moments_char <- paste0("I(", var_name, "^", 1:4, ")")
-  # Creating formula to return moments from svymean
+  # Creating formula to calculate moments using svymean
   moments_formula <- make.formula(moments_char)
   moments <- svymean(moments_formula, design, na.rm = na.rm)
   
-  # Storing expression of method to convert central moments to raw moments,
-  # which allows us to work around the need to quote names that contain
-  # backticks in svycontrast
+  # Storing expression of fourth central moment and variance in terms of raw moments, which allows us to work around the need to quote names that contain backticks in svycontrast
   mu4expr <- substitute(
     -3 * one^4 + 6 * one^2 * two - 4 * one * three + four,
     list(
@@ -65,7 +63,7 @@ svykurt <- function(
       two=as.name(moments_char[2])
     )
   )
-
+  
   central_moments <- svycontrast(
     moments,
     list(
@@ -73,8 +71,8 @@ svykurt <- function(
       sigma2 = sigma2expr
     )
   )
-  # After transforming central moments to raw moments, we can use
-  # svycontrast again to transform raw moments to kurtosis
+  
+  # Now we can use svycontrast to get the kurtosis and its standard error
   kurt <- svycontrast(central_moments, quote(mu4 / (sigma2 * sigma2)))
   
   if (excess) {

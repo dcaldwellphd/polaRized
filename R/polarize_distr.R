@@ -6,7 +6,7 @@
 #' @param value A column containing values on some variable or set of variables, such as attitude item responses.
 #' @param measure A string specifying the measure of distributional polarization. See Details below. 
 #' @param by A character vector of optional groups to nest observations by (e.g., survey wave, country, social group).
-#' @param rescale_0_1 Logical. Setting to TRUE rescales values to range between 0 and 1.
+#' @param rescale_0_1 Logical. Setting to TRUE normalizes values prior to summarizing their distribution.
 #' @param ids Variables specifying cluster ids from largest level to smallest level (leaving the argument empty, NULL, 1, or 0 indicate no clusters).
 #' @param probs Variables specifying cluster sampling probabilities.
 #' @param strata Variables specifying strata.
@@ -19,9 +19,9 @@
 #' @param variance For pps without replacement, use variance="YG" for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator.
 #' 
 #' @details
-#' This function is a one-stop-shop for distributional measures of polarization. It is designed around the \code{survey} package, allowing the incorporation of complex survey design features. It is useful when you want to summarise a large number of attitude distributions at once. This was previously less convenient, as the \code{survey} package requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_distr} will automatically nest the data and apply functions related to the \code{survey} package.
+#' This function is a one-stop-shop for distributional measures of polarization. It is designed around the \code{survey} package, allowing for the incorporation of complex survey design features. It is useful when you want to summarise a large number of attitude distributions at once. This was previously less convenient, as the \code{survey} package requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_distr} will automatically nest the data and apply functions related to the \code{survey} package.
 #' 
-#' The following values are currently accepted by the \code{measure} argument:
+#' The function used is dictated by the \code{measure} argument, which currently accepts the following values:
 #' \itemize{
 #'  \item \code{"mean"}: Mean of the distribution, using \code{survey::svymean}
 #'  \item \code{"median"}: Median of the distribution, using \code{survey::svyquantile}
@@ -33,7 +33,9 @@
 #' \item \code{"extremism"}: Proportion of respondents who are extreme on the distribution, using the \code{svyextremism} function implemented in this package.
 #' \item And these methods for estimating consensus and disagreement on ordered rating scales from the \code{agrmt} package, each of which are run on frequency vectors created using \code{survey::svytable}: \code{"agreement"}, \code{"polarization"}, \code{"Leik"}, \code{"consensus"}, \code{"entropy"}, \code{"BerryMielke"}, \code{"BlairLacy"}, \code{"Kvalseth"}, \code{"lsquared"}, \code{"dsquared"}, \code{"MRQ"}, \code{"concentration"}, \code{"dispersion"}, and \code{"Reardon"}. See \code{\link[agrmt]{agreement}} for more details.}
 #' 
-#' @return A data frame object containing the distributional measure applied to the \code{value} column.
+#' @seealso [`svymean()`][survey::svymean], [`svyquantile()`][survey::svyquantile], [`svyvar()`][survey::svyvar], [`svysd()`][jtools::svysd], [`svykurt()`][polaRized::svykurt], [`svyskew()`][polaRized::svyskew], [`svyextremism()`][polaRized::svyextremism], [`svytable()`][survey::svytable], [`agreement()`][agrmt::agreement], [`polarization()`][agrmt::polarization], [`Leik()`][agrmt::Leik], [`consensus()`][agrmt::consensus], [`entropy()`][agrmt::entropy], [`BerryMielke()`][agrmt::BerryMielke], [`BlairLacy()`][agrmt::BlairLacy], [`Kvalseth()`][agrmt::Kvalseth], [`lsquared()`][agrmt::lsquared], [`dsquared()`][agrmt::dsquared], [`MRQ()`][agrmt::MRQ], [`concentration()`][agrmt::concentration], [`dispersion()`][agrmt::dispersion], [`Reardon()`][agrmt::Reardon]
+#' 
+#' @return A data frame object containing the distributional measure applied to \code{value} for any groups in \code{by}.
 #'
 #' @examples
 #' data(toydata)
@@ -85,7 +87,7 @@ polarize_distr <- function(
     measure,
     by = NULL,
     rescale_0_1 = FALSE,
-    # Arguments to set in as_survey_design
+    # Arguments to set up survey design using as_survey_design from the srvyr package 
     ids = NULL,
     probs = NULL,
     strata = NULL,
@@ -97,7 +99,7 @@ polarize_distr <- function(
     variance = c("HT", "YG")
 ) {
 
-  # For referencing values passed to value_1, value_2, and weights
+  # For referencing values passed to value and weights arguments
   value <- substitute(value)
   weights <- substitute(weights)
 
@@ -119,9 +121,9 @@ polarize_distr <- function(
       "Reardon" = agrmt::Reardon
     )
 
-  # Function to iterate over "by" groups,
-  # summarising the distribution of scales in the value column
-  # using syntax compatible with functions related to the survey R package.
+  # Function to iterate over groups supplied to by argument,
+  # summarising the distribution of values using syntax
+  # compatible with functions related to the survey R package.
   calc_distribution <- function(
     data,
     col = value
@@ -132,6 +134,9 @@ polarize_distr <- function(
       distr <- survey::svymean(
         fmla, design = data
         )
+    # The median,  first quartile and third quartile are
+    # calculated together and filtered out later,
+    # depending on whether measure is "median" or "iqr"
     } else if (
       measure == "median" | measure == "iqr"
       ) {
@@ -160,7 +165,12 @@ polarize_distr <- function(
       distr <- svyextremism(
         fmla, design = data
         )
+    # Supported functions from the agrmt package are
+    # stored in the lookup table above.
     } else if (measure %in% names(agrmt_lookup)) {
+      # The consensus measure from that package requires
+      # a frequency vector of integers, whereas other
+      # measures can handle mixed numbers
       distr <- survey::svytable(
         fmla, design = data, round = ifelse(
           measure == "consensus", TRUE, FALSE
@@ -172,7 +182,8 @@ polarize_distr <- function(
 
     return(distr)
   }
-
+  # Function to normalize value
+  # if rescale_0_1 is set to TRUE
   rescale_value <- function(x) {
     x_scaled <- x - min(x, na.rm = TRUE)
     x_scaled / max(x_scaled, na.rm = TRUE)
@@ -188,6 +199,7 @@ polarize_distr <- function(
       {{ fpc }},
       {{ weights }}
     ) |>
+    # Filtering complete cases
     drop_na({{ value }})
 
   if (rescale_0_1) {
@@ -204,7 +216,7 @@ polarize_distr <- function(
       drop_na({{ weights }}) |>
       filter(.data[[weights]] != 0)
   }
-
+  # Creating a separate survey design object for each group level
   nested_distr <- input |>
     nest_by(across(any_of(by))) |>
     tidytable::mutate(
@@ -222,16 +234,18 @@ polarize_distr <- function(
         variance = variance
       )
     ) |>
-    # Looping through survey objects to calculate distribution
+    # Looping through survey design objects to calculate distribution
     tidytable::mutate(
       distr_list = tidytable::map(
         design_list,
         calc_distribution
       )
       ) |>
+    # Removing nested data
     select(-data, -design_list)
-
+  
   if (measure == "median") {
+    # For the median, we subset the second quartile
     unnested_distr <- nested_distr |>
       mutate(
         quants = map(
@@ -243,6 +257,8 @@ polarize_distr <- function(
       ) |>
       select(-quants, -distr_list)
   } else if (measure == "iqr") {
+    # For the interquartile range, we subset the first and third quartiles
+    # and calculate the difference
     unnested_distr <- nested_distr |>
       mutate(
         quants = map(
@@ -257,6 +273,8 @@ polarize_distr <- function(
       select(
         -quants, -q1, -q3, -distr_list
         )
+  # These measures are already calculated as a single value,
+  # so we can easily unlist them.
   } else if (
     measure %in% c(
       "mean", "var", "std", 
@@ -269,6 +287,11 @@ polarize_distr <- function(
         ) |>
       select(-distr_list)
   } else {
+    # All measures from the agrmt package take a frequency vector as input.
+    # I unnest into n columns, where n is equal to the number of unique values
+    # in the longest scale. This results in NAs for group levels involving shorter
+    # scale lengths. These can be dropped after gathering frequency vectors into a
+    # single column, which is then used to summarize the measure by group.
     agrmt_func <- agrmt_lookup[[measure]]
     unnested_distr <- nested_distr |>
       unnest_wider(col = distr_list) |>
@@ -283,7 +306,8 @@ polarize_distr <- function(
         .by = any_of(by)
       )
   }
-
+  # The resulting value column has the name of the input
+  # and the measure called, separated by an underscore.
   output <- dplyr::rename_with(
     unnested_distr,
     ~ paste0(

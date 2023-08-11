@@ -8,7 +8,7 @@
 #' @param excess Logical. The default (TRUE) subtracts 3 from the output, giving excess kurtosis.
 #' 
 #' @details
-#' This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It uses \code{svymean} to calculate the first four moments, and then transforms these into kurtosis using \code{svycontrast}.
+#' This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It uses \code{svymean} to get the first four moments, and then transforms these into kurtosis using \code{svycontrast}. Setting \code{excess} to TRUE allows the output to be compared with 0, the excess kurtosis of any univariate normal distribution.
 #'
 #' @return An object of class \code{svrepstat} giving the kurtosis its standard error.
 #' 
@@ -33,16 +33,21 @@ svykurt <- function(
     na.rm = FALSE,
     excess = TRUE
 ) {
-
+  # design must be a survey design object
   if (!inherits(design, "survey.design"))
     stop("design is not a survey design")
-
+  
+  # Storing variable in formula as string 
   var_name <- as.character(formula[[2]])
+  # Pasting var_name in strings representing moments of the distribution
   moments_char <- paste0("I(", var_name, "^", 1:4, ")")
+  # Creating formula to return moments from svymean
   moments_formula <- make.formula(moments_char)
-
   moments <- svymean(moments_formula, design, na.rm = na.rm)
-
+  
+  # Storing expression of method to convert central moments to raw moments,
+  # which allows us to work around the need to quote names that contain
+  # backticks in svycontrast
   mu4expr <- substitute(
     -3 * one^4 + 6 * one^2 * two - 4 * one * three + four,
     list(
@@ -68,9 +73,10 @@ svykurt <- function(
       sigma2 = sigma2expr
     )
   )
-
+  # After transforming central moments to raw moments, we can use
+  # svycontrast again to transform raw moments to kurtosis
   kurt <- svycontrast(central_moments, quote(mu4 / (sigma2 * sigma2)))
-
+  
   if (excess) {
     kurt <- kurt - 3
   }

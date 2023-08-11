@@ -25,7 +25,7 @@ spread_pairs <- function(
     other_keys = NULL
     ) {
 
-  # For referencing values passed to name_key and value_key
+  # For referencing values passed to name_key and value_key arguments
   name_key <- substitute(name_key)
   value_key <- substitute(value_key)
 

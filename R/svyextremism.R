@@ -45,7 +45,7 @@ svyextremism <- function(
     level = 0.95,
     df = degf(design)
 ) {
-
+  # design must be a survey design object
   if (!inherits(design, "survey.design"))
     stop("design is not a survey design")
 
@@ -54,17 +54,21 @@ svyextremism <- function(
   var_name <- as.character(formula)[2]
 
   x <- model.frame(formula, design$variables, na.action = na.pass)
-  # Otherwise, length(unique(x)) returns 1,
-  # the number of variables in the formula
+  # Converting to matrix so that length(unique(x)) evaluates the
+  # number of unique values in a variable rather than the number
+  # of variables specified in the formula argument
   x <- as.matrix(x)
-
+  # Limiting function to formulas involving one variable,
+  # both because svyciprop itself takes only a single binary variable
+  # and to avoid complications in counting the number of unique values
+  # across multiple scales
   if (ncol(x) > 1)
     stop("Only calculate extremism one variable at a time")
 
   if(na.rm){
     x <- x[!is.na(x)]
   }
-
+  # What is an extreme value in a scales with two or three response categories?
   if (length(unique(x)) < 4) {
     stop("Scale length too short for meaningfully extreme values")
   } else if (length(unique(x)) <= 9) {
@@ -87,8 +91,11 @@ svyextremism <- function(
   } else {
 stop("Unusual scale length. The svvyextremism function is designed for ordered ratings scales, such as likert scales or feeling thermometers.")
   }
-
-  fmla <- paste0(
+  
+  # Cannot reference "extremities" directly in svyciprop formula without
+  # it being mistaken for a variable that is missing from the survey design, 
+  # so we paste extreme values into a string and convert that to a formula
+  fmla <- as.formula(paste0(
     "~I(",
     var_name,
     "%in% c(",
@@ -98,9 +105,10 @@ stop("Unusual scale length. The svvyextremism function is designed for ordered r
       ),
     "))"
     )
+  )
 
   prop_extremism <- svyciprop(
-    as.formula(fmla),
+    fmla,
     design,
     method,
     level,

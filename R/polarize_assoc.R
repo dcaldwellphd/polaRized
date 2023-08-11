@@ -33,7 +33,7 @@
 #' 
 #' @seealso [`svycor()`][jtools::svycor], [`svyglm()`][survey::svyglm]
 #' 
-#' @return A data frame object containing the measure of association between two sets of values.
+#' @return A data frame object containing the measure of association between \code{value_1} and \code{value_2} for any groups in \code{by}.
 #'
 #' @examples
 #' data(toydata)
@@ -78,7 +78,7 @@ polarize_assoc <- function(
     variance = c("HT", "YG")
     ) {
 
-  # For referencing values passed to value_1, value_2, and weights
+  # For referencing values passed to value_1, value_2, and weights arguments
   value_1 <- substitute(value_1)
   value_1_eval <- eval(value_1, data)
   value_2 <- substitute(value_2)

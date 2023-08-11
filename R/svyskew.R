@@ -5,12 +5,12 @@
 #' @param formula A formula (e.g., ~var1) specifying the variable on which to estimate skewness.
 #' @param design The \code{survey.design} or \code{svyrep.design} object.
 #' @param na.rm Logical. Should cases with missing values be dropped?
-#' 
+#'
 #' @details
 #' This function extends the \code{survey} package by calculating the skewness of a variable in a complex survey design. It writes skewness in terms of raw moments and transforms via \code{svycontrast}.
 #'
 #' @return An object of class \code{svrepstat} giving the skewness and its standard error.
-#' 
+#'
 #' @seealso [`svycontrast()`][survey::svycontrast]
 
 #' @note This function generalizes the approach to estimating skewness provided in the "Examples" section of the documentation for \code{survey::svycontrast}. It has been developed without the knowledge or endorsement of the \code{survey} package authors.
@@ -34,7 +34,7 @@ svyskew <- function(
   # design must be a survey design object
   if (!inherits(design, "survey.design"))
     stop("design is not a survey design")
-  
+
   # Storing variable in formula as string
   var_name <- as.character(formula[[2]])
   # Pasting var_name in strings representing moments of the distribution
@@ -50,13 +50,13 @@ svyskew <- function(
       one = as.name(moments_char[1]),
       two = as.name(moments_char[2]),
       three = as.name(moments_char[3])
-      )
     )
+  )
 
   skewness <- svycontrast(
     moments,
     skewexpr
-    )
+  )
 
   attr(skewness, "statistic") <- "skewness"
   attr(skewness, "names") <- var_name

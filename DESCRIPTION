@@ -1,11 +1,22 @@
 Package: polaRized
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Estimate Political Attitude Polarization in Complex Survey Data
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: person("David", "Caldwell", email = "dcaldwellphd@gmail.com",
+  role = c("aut", "cre"))
+Description: A one-stop-shop for measures of attitude polarization
+  commonly used in the political science literature. It makes it
+  easy to summarize distributional and associational properties among 
+  potentially large numbers of attitude items in complex survey data.
+  The package also provides useful functions for incorporating survey
+  design features into the estimation of key statistics, such as
+  skewness and kurtosis.
+License: GPL-3
+URL: https://github.com/dcaldwellphd/polaRized
+BugReports: https://github.com/dcaldwellphd/polaRized/issues
+Depends: 
+    R (>= 2.10)
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.2.3
+

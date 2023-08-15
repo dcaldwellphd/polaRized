@@ -10,7 +10,7 @@
 #' @param df Denominator degrees of freedom. See \code{\link[survey]{svyciprop}} for more details.
 #'
 #' @details
-#' This function wraps around the \code{svyciprop} function from the \code{survey} package. It is like calling \code{svyciprop(~I(variable == value), design), but \code{svyextremism} automatically classifies and measures the proportion of extreme values on ordered ratings scales with different lengths. If the scale has less than 10 (and more than 3) unique values, the function uses its minimum and maximum as extreme values. If the scale has 10 or 11 unique values, extreme values also include the second lowest and highest response categories. If the scale is a feeling thermometer with 100 or 101 unique response categories, the top 20 and bottom 20 unique values are classed as extreme. Calling \code{svyextremism} on any other scale length returns an error. The approach to measuring extremism implemented here is based on previous research into attitude polarization (Adams et al. 2012; Caldwell 2023; Cohen & Cohen 2021), and allows the \code{polarize_distr} function from this package to loop over heterogeneous rataing scales.
+#' This function wraps around the \code{svyciprop} function from the \code{survey} package. It is like calling \code{svyciprop(~I(variable == value), design)}, but \code{svyextremism} automatically classifies and measures the proportion of extreme values on ordered ratings scales with different lengths. If the scale has less than 10 (and more than 3) unique values, the function uses its minimum and maximum as extreme values. If the scale has 10 or 11 unique values, extreme values also include the second lowest and highest response categories. If the scale is a feeling thermometer with 100 or 101 unique response categories, the top 20 and bottom 20 unique values are classed as extreme. Calling \code{svyextremism} on any other scale length returns an error. The approach to measuring extremism implemented here is based on previous research into attitude polarization (Adams et al. 2012; Caldwell 2023; Cohen & Cohen 2021), and allows the \code{polarize_distr} function from this package to loop over heterogeneous rataing scales.
 #'
 #' @references
 #'
@@ -21,17 +21,18 @@
 #' Cohen, G. and Cohen, S. (2021). Depolarization, Repolarization and Redistributive Ideological Change in Britain, 1983–2016. \emph{British Journal of Political Science}, 51(3):1181–1202.
 #'
 #' @seealso [`svyciprop()`][survey::svyciprop]
-#' 
+#'
 #' @note This function was written without the knowledge or endorsement of the \code{survey} package authors.
 #'
 #' @return An object of class \code{svyciprop} giving the proportion and its confidence interval
 #'
 #' @examples
-#'  data(toydata)
+#' library(survey)
+#' data(toydata)
 #' # Create survey design object
 #' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
 #' # Print the proportion of extremism on a variable without specifying extreme values
-#' svyextremism(~att_5, design = toydesign)
+#' svyextremism(~att5val, design = toydesign)
 #'
 #' @export
 #'
@@ -91,9 +92,9 @@ svyextremism <- function(
   } else {
 stop("Unusual scale length. The svvyextremism function is designed for ordered ratings scales, such as likert scales or feeling thermometers.")
   }
-  
+
   # Cannot reference "extremities" directly in svyciprop formula without
-  # it being mistaken for a variable that is missing from the survey design, 
+  # it being mistaken for a variable that is missing from the survey design,
   # so we paste extreme values into a string and convert that to a formula
   fmla <- as.formula(paste0(
     "~I(",

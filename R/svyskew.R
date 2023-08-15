@@ -16,11 +16,12 @@
 #' @note This function generalizes the approach to estimating skewness provided in the "Examples" section of the documentation for \code{survey::svycontrast}. It has been developed without the knowledge or endorsement of the \code{survey} package authors.
 #'
 #' @examples
-#'  data(toydata)
+#' library(survey)
+#' data(toydata)
 #' # Create survey design object
 #' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
 #' # Print the standardized skewness coefficient of a variable
-#' svyskew(formula = ~att_5, design = toydesign)
+#' svyskew(formula = ~att5val, design = toydesign)
 #'
 #' @export
 #'

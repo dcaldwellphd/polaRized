@@ -17,34 +17,34 @@
 #' @param weights Variables specifying weights (inverse of probability).
 #' @param pps "brewer" to use Brewer's approximation for PPS sampling without replacement. "overton" to use Overton's approximation. An object of class HR to use the Hartley-Rao approximation. An object of class ppsmat to use the Horvitz-Thompson estimator.
 #' @param variance For pps without replacement, use variance="YG" for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator.
-#' 
-#' @details 
+#'
+#' @details
 #' This function implements two prominent associational measures of polarization. It is designed around the \code{survey} package, allowing the incorporation of complex survey design features. It is useful when you want to calculate associational measures of polarization over a large number of attitude items. This was previously less convenient in the \code{survey} package, which requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_assoc} will automatically nest the data and apply functions related to the \code{survey} package.
-#' 
+#'
 #'  When \code{r_or_r2} is set to "r", \code{jtools::svycor} is used to calculate the Pearson correlation between \code{value_1} and \code{value_2}. The \code{svycor} function is essentially a wrapper around \code{survey::svyvar}. It calculates the variance-covariance matrix of variables supplied to the formula and extracts the correlation coefficient using \code{cov2cor} (see Long 2023).
-#' 
+#'
 #' When \code{r_or_r2} is set to "r2", the function fits OLS regression models using \code{survey::svyglm}. The column supplied to \code{value_1} will be used as the dependent variable and the column supplied to \code{value_2} will be the independent variable. The direction of this relationship makes no difference in practice, however. The $R^2$ and adjusted $R^2$ are extracted from each model and returned as the output, giving the square of the correlation between observed and predicted outcomes. These statistics are similar to squaring the Pearson correlation between two variables, only the regression framework allows for the incorporation of categorical predictors, such as unordered party values (see Caldwell, Cohen, and Vivyan 2023).
-#' 
+#'
 #' @references
-#' 
+#'
 #' Caldwell, D.,  Cohen, C. and Vivyan, N. (2023). Long-Run Trends in Political Polarization of Climate Policy-Relevant Attitudes Across Countries. \emph{Working Paper}.
-#' 
+#'
 #' Long, J. (2023). \emph{Calculate correlations and correlation tables with complex survey data}. Retrieved from \url{https://cran.r-project.org/web/packages/jtools/vignettes/svycor.html}
-#' 
+#'
 #' @seealso [`svycor()`][jtools::svycor], [`svyglm()`][survey::svyglm]
-#' 
+#'
 #' @return A data frame object containing the measure of association between \code{value_1} and \code{value_2} for any groups in \code{by}.
 #'
 #' @examples
 #' data(toydata)
 #' # Partisan polarization using Pearson correlation between attitude item and ordinal party affiliation variable
-#' party_pol <- polarize_assoc(data = toydata_l, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c("att_name", "group", "time"))
+#' party_pol <- polarize_assoc(data = toydata_l, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c("att_name", "group"))
 #'
 #' # Partisan polarization using unordered party categories and no groups
 #' multiparty_pol <- polarize_assoc(data = toydata_l, value_1 = att_val, value_2 = party_cat, r_or_r2 = "r2")
 #'
 #' # Ideological polarization using the Pearson correlation between attitude pairs and no groups
-#' paired_toydata <- spread_pairs(data = toydata_l, name_key = att_name, value_key = att_val, other_keys = c("id", "group", "time"))
+#' paired_toydata <- spread_pairs(data = toydata_l, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
 #' ideology_pol <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r")
 #'
 #' # Ideological polarization grouping R-squared statistics by attitude pair
@@ -58,7 +58,7 @@
 #' @importFrom tidytable mutate map
 #' @importFrom srvyr as_survey_design
 #' @importFrom tidyselect any_of
-#' @importFrom dplyr select filter nest_by across mutate
+#' @importFrom dplyr select filter nest_by across
 
 polarize_assoc <- function(
     data,
@@ -93,7 +93,7 @@ polarize_assoc <- function(
     col1 = value_1,
     col2 = value_2
     ) {
-      
+
       if (r_or_r2 == "r") {
       # Syntax for the formula compatible with svycor
       fmla <- as.formula(paste0("~", col1, " + ", col2))
@@ -138,8 +138,8 @@ polarize_assoc <- function(
   # Creating a separate survey design object for each group level
   nested_assocs <- input |>
     nest_by(across(any_of(by))) |>
-    tidytable::mutate(
-      design_list = tidytable::map(
+    mutate(
+      design_list = map(
         data,
         as_survey_design,
         ids = {{ ids }},
@@ -154,8 +154,8 @@ polarize_assoc <- function(
       )
     ) |>
     # Looping through survey design objects to calculate association
-    tidytable::mutate(
-      assoc_list = tidytable::map(
+    mutate(
+      assoc_list = map(
         design_list,
         calc_association
       )

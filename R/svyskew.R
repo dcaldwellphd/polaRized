@@ -19,9 +19,9 @@
 #' library(survey)
 #' data(toydata)
 #' # Create survey design object
-#' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
+#' toydesign <- svydesign(data = toydata, ids = ~1, weights = ~weight)
 #' # Print the standardized skewness coefficient of a variable
-#' svyskew(formula = ~att5val, design = toydesign)
+#' svyskew(formula = ~att_val, design = toydesign, na.rm = TRUE)
 #'
 #' @export
 #'

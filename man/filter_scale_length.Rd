@@ -24,8 +24,8 @@ Filters ordered ratings scales with a minimum length of unique values.
 \examples{
 data(toydata)
 # The default is to filter ordered ratings scales with a minimum length of 4 unique values
-toydata_l <- filter_scale_length(toydata_l, scale_names = att_name, scale_values = att_val)
+toydata <- filter_scale_length(toydata, scale_names = att_name, scale_values = att_val)
 # To change the threshold, set min_scale_length to the desired value
-toydata_l <- filter_scale_length(toydata_l, scale_names = att_name, scale_values = att_val, min_scale_length = 5)
+toydata <- filter_scale_length(toydata, scale_names = att_name, scale_values = att_val, min_scale_length = 5)
 
 }

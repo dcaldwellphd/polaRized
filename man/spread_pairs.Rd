@@ -23,6 +23,6 @@ Takes a name key and value key and spreads into unique pairs of observations
 }
 \examples{
 data(toydata)
-paired_items <- spread_pairs(data = toydata_l, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
+paired_items <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
 
 }

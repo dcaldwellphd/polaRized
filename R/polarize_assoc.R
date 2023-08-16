@@ -38,13 +38,13 @@
 #' @examples
 #' data(toydata)
 #' # Partisan polarization using Pearson correlation between attitude item and ordinal party affiliation variable
-#' party_pol <- polarize_assoc(data = toydata_l, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c("att_name", "group"))
+#' party_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c("att_name", "group"))
 #'
 #' # Partisan polarization using unordered party categories and no groups
-#' multiparty_pol <- polarize_assoc(data = toydata_l, value_1 = att_val, value_2 = party_cat, r_or_r2 = "r2")
+#' multiparty_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_cat, r_or_r2 = "r2")
 #'
 #' # Ideological polarization using the Pearson correlation between attitude pairs and no groups
-#' paired_toydata <- spread_pairs(data = toydata_l, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
+#' paired_toydata <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
 #' ideology_pol <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r")
 #'
 #' # Ideological polarization grouping R-squared statistics by attitude pair

@@ -3,22 +3,27 @@
 
 #' Survey data on attitudes and partisanship
 #'
-#' Artificially generated survey data on attitudes and partisanship. It comes in two formats to illustrate how to use different functions from the package. The longer \code{toydata_l} records attitudes towards different issues using name-value keys. The wider \code{toydata_w} contains separate columns for attitude items. In both cases, rows record attitudes towards an issue among individuals organized by partisanship and group.
+#' Artificially generated survey data on attitudes and partisanship. Rows contains responses on ordered ratings scales  among individuals that are organized by attitude item, partisanship, and group.
 #'
 #' @docType data
 #'
 #' @usage data(toydata)
-#' 
-#' @format Two objects of class \code{data.frame}
+#'
+#' @format An object of class \code{data.frame}
 #' \describe{
-#'  \item{toydata_l}{A data frame with 14,000 rows and 7 variables: \code{id}, \code{group}, \code{party_cat}, \code{party_ord}, \code{weight}, \code{att_name}, \code{att_val}}.
-#' \item{toydata_w}{A data frame with 2000 rows and 12 variables, which are the same as \code{toydata_l} except that \code{att_name} and \code{att_val} are spread across 7 columns: \code{att2val}, \code{att4val}, \code{att5val}, \code{att10val}, \code{att11val}, \code{att100val}, \code{att101val}}.
-#' }
-#' @references These data sets were artificially generated for the polaRized package.
+#'  \item{id}{A serial ID column}
+#'  \item{group}{Groups called "them" and "us"}
+#'  \item{party_cat}{Unordered party categories called "up", "down", "left", and "right"}
+#'  \item{party_ord}{Ordinal party categories between 1 and 7}
+#'  \item{att_name}{The name of ordered ratings scales for items of different lengths commonly found in attitudinal research: `att2val`, `att4val`, `att5val`, `att10val`, `att11val`, `att100val`, `att101val`}
+#'  \item{att_val}{Values across attitude items in `att_name`, ranging between 0 and 100}
+#'  \item{weight}{Randomly generated sampling weights between 0.1 and 2}
+#'  }
+#'
+#'
+#' @references This data set was artificially generated for the polaRized package.
 #' @keywords datasets
 #' @examples
 #' data(toydata)
-#' head(toydata_l)
-#' head(toydata_w) 
-"toydata_l"
-"toydata_w"
+#' head(toydata)
+"toydata"

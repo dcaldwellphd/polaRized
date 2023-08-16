@@ -30,9 +30,9 @@
 #' library(survey)
 #' data(toydata)
 #' # Create survey design object
-#' toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
+#' toydesign <- svydesign(data = toydata, ids = ~1, weights = ~weight)
 #' # Print the proportion of extremism on a variable without specifying extreme values
-#' svyextremism(~att5val, design = toydesign)
+#' svyextremism(~att_val, design = toydesign, na.rm = TRUE)
 #'
 #' @export
 #'

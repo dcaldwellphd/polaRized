@@ -75,7 +75,7 @@ The latter is set by the \code{measure} argument, which currently accepts the fo
 \examples{
 data(toydata)
 # Filter attitude items with a length of unique values above 3
-filtered_toydata <- filter_scale_length(toydata_l, scale_names = att_name, scale_values = att_val)
+filtered_toydata <- filter_scale_length(toydata, scale_names = att_name, scale_values = att_val)
 
 # Describing the central tendency of distributions surrounding attitude items
 att_means <- polarize_distr(data = filtered_toydata, value = att_val, measure = "mean", by = c("att_name", "group"), rescale_0_1 = TRUE)

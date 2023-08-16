@@ -4,7 +4,7 @@ set.seed(123)
 
 n <- 2000
 
-toydata_w <- tibble(
+toydata <- tibble(
   group = sample(c("them", "us"), n, replace = TRUE),
   party_cat = sample(c("up", "down", "left", "right", NA), n, replace = TRUE),
   party_ord = sample(c(seq(1, 7, 1), NA), n, replace = TRUE),
@@ -17,9 +17,7 @@ toydata_w <- tibble(
   att101val = sample(c(seq(0, 100, 1), NA), n, replace = TRUE),
   weight = runif(n, min = 0.1, max = 2),
   id = seq(1, n, 1)
-)
-
-toydata_l <- toydata_w |>
+  ) |>
   tidyr::pivot_longer(
     cols = c(contains("att")),
     names_to = "att_name",
@@ -28,5 +26,4 @@ toydata_l <- toydata_w |>
 
 rm(n)
 
-save(toydata_l, toydata_w, file = "data/toydata.RData")
-usethis::use_data(toydata_l, toydata_w, overwrite = TRUE)
+usethis::use_data(toydata, overwrite = TRUE)

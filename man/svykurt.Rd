@@ -22,7 +22,7 @@ An object of class \code{svrepstat} giving the kurtosis its standard error.
 Calculates kurtosis with complex survey data
 }
 \details{
-This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It writes the variance and fourth central moment in terms of raw moments and then transorms into kurtosis via \code{svycontrast}. Setting \code{excess} to TRUE allows the output to be compared with 0, the excess kurtosis of any univariate normal distribution.
+This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It writes the variance and fourth central moment in terms of raw moments and then transforms into kurtosis via \code{svycontrast}. Setting \code{excess} to TRUE allows the output to be compared with 0, the excess kurtosis of any univariate normal distribution.
 }
 \note{
 The approach used in this function is based on guidance from Thomas Lumley, the \code{survey} package's author (see {https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package}{here} and {https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i}{here}).
@@ -31,9 +31,9 @@ The approach used in this function is based on guidance from Thomas Lumley, the 
 library(survey)
 data(toydata)
 # Create survey design object
-toydesign <- svydesign(data = toydata_w, ids = ~1, weights = ~weight)
+toydesign <- svydesign(data = toydata, ids = ~1, weights = ~weight)
 # Print the excess kurtosis of a variable
-svykurt(formula = ~att5val, design = toydesign)
+svykurt(formula = ~att_val, design = toydesign, na.rm = TRUE)
 
 }
 \seealso{

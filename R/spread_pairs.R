@@ -11,8 +11,8 @@
 #'
 #' @examples
 #' data(toydata)
-#' paired_items <- spread_pairs(data = toydata_l, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
-#' 
+#' paired_items <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
+#'
 #' @export
 #' @importFrom dplyr distinct pull rename select left_join rename_with
 #' @importFrom tidyselect any_of

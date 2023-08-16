@@ -1,6 +1,6 @@
 Package: polaRized
 Type: Package
-Title: Estimate Political Attitude Polarization in Complex Survey Data
+Title: Estimating Political Attitude Polarization in Complex Survey Data
 Version: 0.1.0
 Authors@R: person("David", "Caldwell", email = "dcaldwellphd@gmail.com",
   role = c("aut", "cre"))
@@ -15,8 +15,21 @@ License: GPL-3
 URL: https://github.com/dcaldwellphd/polaRized
 BugReports: https://github.com/dcaldwellphd/polaRized/issues
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
+Imports: 
+    agrmt (>= 1.42),
+    dplyr (>= 1.1.0),
+    jtools,
+    srvyr,
+    survey (>= 3.1),
+    tibble,
+    tidyr (>= 0.6.0),
+    tidyselect (>= 1.0.0),
+    tidytable
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
-
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

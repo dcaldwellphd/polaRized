@@ -1,0 +1,19 @@
+---
+title: "Introducing polaRized: An R Package for Estimating Political Attitude Polarization in Complex Survey Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introducing polaRized: An R Package for Estimating Political Attitude Polarization in Complex Survey Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(polaRized)
+```

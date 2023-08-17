@@ -6,7 +6,7 @@ n <- 2000
 
 toydata <- tibble(
   group = sample(c("them", "us"), n, replace = TRUE),
-  party_cat = sample(c("up", "down", "left", "right", NA), n, replace = TRUE),
+  party_cat = sample(c("left", "right", "liberal", "conservative", NA), n, replace = TRUE),
   party_ord = sample(c(seq(1, 7, 1), NA), n, replace = TRUE),
   att2val = sample(c(0, 1, NA), n, replace = TRUE),
   att4val = sample(c(seq(1, 4, 1), NA), n, replace = TRUE),
@@ -22,7 +22,10 @@ toydata <- tibble(
     cols = c(contains("att")),
     names_to = "att_name",
     values_to = "att_val"
-  )
+  ) |>
+  dplyr::select(
+    id, group, party_cat, party_ord, att_name, att_val, weight
+    )
 
 rm(n)
 

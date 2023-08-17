@@ -1,5 +1,7 @@
 ---
 title: "Introducing polaRized: An R Package for Estimating Political Attitude Polarization in Complex Survey Data"
+author: David Caldwell
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introducing polaRized: An R Package for Estimating Political Attitude Polarization in Complex Survey Data}
@@ -14,6 +16,36 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+## Overview
+
+This package makes it easy to apply various measures of attitude polarization across potentially many ordered ratings scales in complex survey data. The two main functions are `polarize_assoc` and `polarize_distr`, which return key associational and distributional statitistics, respectively. The package also introduces some extensions to the `survey` package, enabling the incorporation of complex design features into the estimation of statistics commonly used to measure attitude polarization:
+
+- `svykurt` calculates kurtosis.
+- `svyskew` calculates standadized skewness.
+- `svyextremism` calculates the proportion of extreme responses on ordered ratings scales with different lengths.
+
+Additionally, two helper functions make it easier to prepare data prior to calculating polarization: `filter_scale_length` returns ordered ratings scales that meet a user-defined threshold of unique values, which is useful for statistics that require a certain scale length; `spread_pairs` takes a name key and value key and spreads these columns across unique pairs of observations, making it easier to estimate the association between responses on different survey items.
+
+## Installation
+
+The package can be installed direclty from [GitHub](https://github.com/dcaldwellphd/polaRized) using:
+
+```{r, message=FALSE, warning=FALSE, results = "hide", eval=FALSE}
+library(devtools)
+devtools::install_github("dcaldwellphd/polaRized")
+```
+
+Then load its functions and internal dataset using:
+
+```{r}
 library(polaRized)
+```
+
+## Data prerequisites
+
+Apart from the `svykurt`, `svyskew`, and `svyextremism`, which can be called on any column containing numerical values, the functions in this package expect data to be stacked in a longer format. There should be a single value column or (for associational measures of polarization) pair of value columns containing observations across groups. The built-in data set (`toydata`) comes in this format.
+
+```{r}
+data(toydata)
+head(toydata)
 ```

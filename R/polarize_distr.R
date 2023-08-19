@@ -205,7 +205,7 @@ polarize_distr <- function(
 
   if (rescale_0_1) {
     input <- input |>
-      tidytable::mutate(
+      mutate(
         {{ value }} := rescale_value({{ value }}),
         .by = any_of(by)
       )
@@ -220,8 +220,8 @@ polarize_distr <- function(
   # Creating a separate survey design object for each group level
   nested_distr <- input |>
     nest_by(across(any_of(by))) |>
-    tidytable::mutate(
-      design_list = tidytable::map(
+    mutate(
+      design_list = map(
         data,
         as_survey_design,
         ids = {{ ids }},
@@ -236,8 +236,8 @@ polarize_distr <- function(
       )
     ) |>
     # Looping through survey design objects to calculate distribution
-    tidytable::mutate(
-      distr_list = tidytable::map(
+    mutate(
+      distr_list = map(
         design_list,
         calc_distribution
       )
@@ -248,27 +248,27 @@ polarize_distr <- function(
   if (measure == "median") {
     # For the median, we subset the second quartile
     unnested_distr <- nested_distr |>
-      tidytable::mutate(
-        quants = tidytable::map(
+      mutate(
+        quants = map(
         distr_list,
         `[[`,
         value
         ),
-      value = tidytable::map(quants, `[`, 2)
+      value = map(quants, `[`, 2)
       ) |>
       select(-quants, -distr_list)
   } else if (measure == "iqr") {
     # For the interquartile range, we subset the first and third quartiles
     # and calculate the difference
     unnested_distr <- nested_distr |>
-      tidytable::mutate(
-        quants = tidytable::map(
+      mutate(
+        quants = map(
           distr_list,
           `[[`,
           value
           ),
-        q1 = as.numeric(tidytable::map(quants, `[`, 1)),
-        q3 = as.numeric(tidytable::map(quants, `[`, 3)),
+        q1 = as.numeric(map(quants, `[`, 1)),
+        q3 = as.numeric(map(quants, `[`, 3)),
         value = q3 - q1
         ) |>
       select(
@@ -283,7 +283,7 @@ polarize_distr <- function(
       )
     ) {
     unnested_distr <- nested_distr |>
-      tidytable::mutate(
+      mutate(
         value = unlist(distr_list)
         ) |>
       select(-distr_list)

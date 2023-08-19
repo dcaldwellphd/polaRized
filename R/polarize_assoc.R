@@ -55,7 +55,6 @@
 #' @importFrom survey svyglm
 #' @importFrom jtools svycor
 #' @importFrom tidyr drop_na
-#' @importFrom rlang :=
 #' @importFrom tidytable mutate map
 #' @importFrom srvyr as_survey_design
 #' @importFrom tidyselect any_of

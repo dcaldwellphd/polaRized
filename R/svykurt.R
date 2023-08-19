@@ -26,7 +26,7 @@
 #'
 #' @export
 #'
-#' @importFrom survey svymean svycontrast
+#' @importFrom survey make.formula svymean svycontrast
 
 svykurt <- function(
     formula,

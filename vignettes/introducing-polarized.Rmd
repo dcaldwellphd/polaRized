@@ -31,8 +31,7 @@ Additionally, two helper functions make it easier to prepare data prior to calcu
 The package can be installed direclty from [GitHub](https://github.com/dcaldwellphd/polaRized) using:
 
 ```{r, message=FALSE, warning=FALSE, results = "hide", eval=FALSE}
-library(devtools)
-devtools::install_github("dcaldwellphd/polaRized")
+pak::pak("dcaldwellphd/polaRized")
 ```
 
 Then load its functions and internal dataset using:
@@ -43,9 +42,40 @@ library(polaRized)
 
 ## Data prerequisites
 
-Apart from the `svykurt`, `svyskew`, and `svyextremism`, which can be called on any column containing numerical values, the functions in this package expect data to be stacked in a longer format. There should be a single value column or (for associational measures of polarization) pair of value columns containing observations across groups. The built-in data set (`toydata`) comes in this format.
+Apart from the `svykurt`, `svyskew`, and `svyextremism`, which are general extensions to the `survey` package and designed to be called like any other function from that package, `polaRized` functions expect data to be stacked in a longer format. There should be a single value column or (for associational measures of polarization) pair of value columns containing observations across groups. The built-in data set (`toydata`) comes in this format.
 
 ```{r}
 data(toydata)
 head(toydata)
 ```
+
+It has $n \times p$ rows recording the $nth$ respondent's rating on attitude item $p$. These values are stored in the name-value pair, `att_name` and `att_val`. The main functions from the `polaRized` package are designed to iterate over the `att_name` column, calculating statistics related to polarization using values in the `att_val` column.
+
+## Describing attitude polarization using the `polaRized` package
+
+Two main approaches to measuring attitude polarization are used in the political science literature: distributional and associational. Distributional measures describe aspects of the distribution of public opinion surrounding political issues, such as the dispersion, multimodality, and extremism in attitudes. The `polarize_distr` function includes many options for calculating these quantities, including variance, standard deviation, the interquartile range, kurtosis, and the proportion of extreme responses to ordered ratings scales. For example:
+
+```{r}
+attkurt <- polarize_distr(
+  data = toydata,
+  value = att_val,
+  measure = "kurt",
+  by = c("att_name", "group")
+)
+
+print(attkurt)
+```
+
+It can also return other statistics that do not directly measure distributional states of polarization but are useful for interpreting the changes causing them, i.e., the mean, median, and standardized skewness. Finally, the function also accepts methods for estimating consensus and disagreement on ordered rating scales from the the `agrmt` package, like van der Eijk's [-@VanDerEijk2001] agreement A.
+
+All of these options are fully integrated with the `survey` package and respect complex design features
+
+Options for including survey design features
+
+filtering scale lengths
+
+normalizing scales
+
+Grouping output and aggregating across scales
+
+

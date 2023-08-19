@@ -138,8 +138,8 @@ polarize_assoc <- function(
   # Creating a separate survey design object for each group level
   nested_assocs <- input |>
     nest_by(across(any_of(by))) |>
-    mutate(
-      design_list = map(
+    tidytable::mutate(
+      design_list = tidytable::map(
         data,
         as_survey_design,
         ids = {{ ids }},
@@ -154,8 +154,8 @@ polarize_assoc <- function(
       )
     ) |>
     # Looping through survey design objects to calculate association
-    mutate(
-      assoc_list = map(
+    tidytable::mutate(
+      assoc_list = tidytable::map(
         design_list,
         calc_association
       )
@@ -164,23 +164,23 @@ polarize_assoc <- function(
   if (r_or_r2 == "r") {
     # svycor returns a 2*2 matrix named "cors"
     # Extracting a copy of the correlation between value_1 and value_2 from every cors object
-    output <- mutate(
+    output <- tidytable::mutate(
       nested_assocs,
-      r = map(
+      r = tidytable::map(
         assoc_list,
         ~ .x$cors[2]
       )
     )
   } else if (r_or_r2 == "r2") {
     # Extracting the R-squared and adjusted R-squared from every summary.lm object
-    output <- mutate(
+    output <- tidytable::mutate(
       nested_assocs,
-      r2 = map(
+      r2 = tidytable::map(
         assoc_list,
         `[[`,
         "r.squared"
       ),
-      adj_r2 = map(
+      adj_r2 = tidytable::map(
         assoc_list,
         `[[`,
         "adj.r.squared"

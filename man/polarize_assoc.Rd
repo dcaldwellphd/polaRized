@@ -14,11 +14,8 @@ polarize_assoc(
   probs = NULL,
   strata = NULL,
   fpc = NULL,
-  nest = FALSE,
-  check_strata = !nest,
   weights = NULL,
-  pps = FALSE,
-  variance = c("HT", "YG")
+  nest = FALSE
 )
 }
 \arguments{
@@ -41,15 +38,9 @@ polarize_assoc(
 \item{fpc}{Variables specifying a finite population correct, see
 \code{\link[survey]{svydesign}} for more details.}
 
-\item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting within strata.}
-
-\item{check_strata}{If \code{TRUE}, check that clusters are nested in strata.}
-
 \item{weights}{Variables specifying weights (inverse of probability).}
 
-\item{pps}{"brewer" to use Brewer's approximation for PPS sampling without replacement. "overton" to use Overton's approximation. An object of class HR to use the Hartley-Rao approximation. An object of class ppsmat to use the Horvitz-Thompson estimator.}
-
-\item{variance}{For pps without replacement, use variance="YG" for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator.}
+\item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting within strata.}
 }
 \value{
 A data frame object containing the measure of association between \code{value_1} and \code{value_2} for any groups in \code{by}.
@@ -60,9 +51,9 @@ Calculates associational measures of polarization
 \details{
 This function implements two prominent associational measures of polarization. It is designed around the \code{survey} package, allowing the incorporation of complex survey design features. It is useful when you want to calculate associational measures of polarization over a large number of attitude items. This was previously less convenient in the \code{survey} package, which requires the user to specify variables manually. Pass columns containing grouping information (such as variable names) to the \code{by} argument, and \code{polarize_assoc} will automatically nest the data and apply functions related to the \code{survey} package.
 
- When \code{r_or_r2} is set to "r", \code{jtools::svycor} is used to calculate the Pearson correlation between \code{value_1} and \code{value_2}. The \code{svycor} function is essentially a wrapper around \code{survey::svyvar}. It calculates the variance-covariance matrix of variables supplied to the formula and extracts the correlation coefficient using \code{cov2cor} (see Long 2023).
+When \code{r_or_r2} is set to "r", \code{polarize_assoc} transforms the underlying covariance matrix calculated by \code{survey::svyvar} into Pearson correlation coefficients using the \code{cov2cor} function. This approach is recommended by the \code{survey} package author, Thomas Lumley (see {https://stackoverflow.com/questions/34418822/pearson-correlation-coefficient-in-rs-survey-package#41031088}{this} discussion on Stack Overflow).
 
-When \code{r_or_r2} is set to "r2", the function fits OLS regression models using \code{survey::svyglm}. The column supplied to \code{value_1} will be used as the dependent variable and the column supplied to \code{value_2} will be the independent variable. The direction of this relationship makes no difference in practice, however. The $R^2$ and adjusted $R^2$ are extracted from each model and returned as the output, giving the square of the correlation between observed and predicted outcomes. These statistics are similar to squaring the Pearson correlation between two variables, only the regression framework allows for the incorporation of categorical predictors, such as unordered party values (see Caldwell, Cohen, and Vivyan 2023).
+When \code{r_or_r2} is set to "r2", \code{polarize_assoc} fits OLS regression models using \code{survey::svyglm}. The column supplied to \code{value_1} will be used as the dependent variable and the column supplied to \code{value_2} will be the independent variable. The direction of this relationship makes no difference in practice, however. The $R^2$ and adjusted $R^2$ are extracted from each model and returned as the output, giving the square of the correlation between observed and predicted outcomes. These statistics are similar to squaring the Pearson correlation between two variables, only the regression framework allows for the incorporation of categorical predictors, such as unordered party values (see Caldwell, Cohen, and Vivyan 2023).
 }
 \examples{
 data(toydata)
@@ -82,9 +73,7 @@ ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value
 }
 \references{
 Caldwell, D.,  Cohen, C. and Vivyan, N. (2023). Long-Run Trends in Political Polarization of Climate Policy-Relevant Attitudes Across Countries. \emph{Working Paper}.
-
-Long, J. (2023). \emph{Calculate correlations and correlation tables with complex survey data}. Retrieved from \url{https://cran.r-project.org/web/packages/jtools/vignettes/svycor.html}
 }
 \seealso{
-[`svycor()`][jtools::svycor], [`svyglm()`][survey::svyglm]
+[`svyvar()`][survey::svyvar], [`svyglm()`][survey::svyglm]
 }

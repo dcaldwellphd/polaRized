@@ -14,11 +14,8 @@ polarize_distr(
   probs = NULL,
   strata = NULL,
   fpc = NULL,
-  nest = FALSE,
-  check_strata = !nest,
   weights = NULL,
-  pps = FALSE,
-  variance = c("HT", "YG")
+  nest = FALSE
 )
 }
 \arguments{
@@ -41,15 +38,9 @@ polarize_distr(
 \item{fpc}{Variables specifying a finite population correct, see
 \code{\link[survey]{svydesign}} for more details.}
 
-\item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting within strata.}
-
-\item{check_strata}{If \code{TRUE}, check that clusters are nested in strata.}
-
 \item{weights}{Variables specifying weights (inverse of probability).}
 
-\item{pps}{"brewer" to use Brewer's approximation for PPS sampling without replacement. "overton" to use Overton's approximation. An object of class HR to use the Hartley-Rao approximation. An object of class ppsmat to use the Horvitz-Thompson estimator.}
-
-\item{variance}{For pps without replacement, use variance="YG" for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator.}
+\item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting within strata.}
 }
 \value{
 A data frame object containing the distributional measure applied to \code{value} for any groups in \code{by}.
@@ -66,7 +57,7 @@ The latter is set by the \code{measure} argument, which currently accepts the fo
  \item \code{"median"}: Median of the distribution, using \code{survey::svyquantile}
 \item \code{"iqr"}: Interquartile range of the distribution, using \code{survey::svyquantile}
 \item \code{"var"}: Variance of the distribution, using \code{survey::svyvar}
-\item \code{"std"}: Standard deviation of the distribution, using \code{jtools::svysd}, which is a wrapper around \code{survey::svyvar}
+\item \code{"std"}: Standard deviation of the distribution, using \code{sqrt(survey::svyvar)}
 \item \code{"kurt"}: Kurtosis of the distribution, using the \code{svykurt} function implemented in this package
 \item \code{"skew"}: Skewness of the distribution, using the \code{svyskew} function implemented in this package
 \item \code{"extremism"}: Proportion of respondents who are extreme on the distribution, using the \code{svyextremism} function implemented in this package.
@@ -107,5 +98,5 @@ att_Reardon <- polarize_distr(data = filtered_toydata, value = att_val, measure 
 
 }
 \seealso{
-[`svymean()`][survey::svymean], [`svyquantile()`][survey::svyquantile], [`svyvar()`][survey::svyvar], [`svysd()`][jtools::svysd], [`svykurt()`][polaRized::svykurt], [`svyskew()`][polaRized::svyskew], [`svyextremism()`][polaRized::svyextremism], [`svytable()`][survey::svytable], [`agreement()`][agrmt::agreement], [`polarization()`][agrmt::polarization], [`Leik()`][agrmt::Leik], [`consensus()`][agrmt::consensus], [`entropy()`][agrmt::entropy], [`BerryMielke()`][agrmt::BerryMielke], [`BlairLacy()`][agrmt::BlairLacy], [`Kvalseth()`][agrmt::Kvalseth], [`lsquared()`][agrmt::lsquared], [`dsquared()`][agrmt::dsquared], [`MRQ()`][agrmt::MRQ], [`concentration()`][agrmt::concentration], [`dispersion()`][agrmt::dispersion], [`Reardon()`][agrmt::Reardon]
+[`svymean()`][survey::svymean], [`svyquantile()`][survey::svyquantile], [`svyvar()`][survey::svyvar], [`svykurt()`][polaRized::svykurt], [`svyskew()`][polaRized::svyskew], [`svyextremism()`][polaRized::svyextremism], [`svytable()`][survey::svytable], [`agreement()`][agrmt::agreement], [`polarization()`][agrmt::polarization], [`Leik()`][agrmt::Leik], [`consensus()`][agrmt::consensus], [`entropy()`][agrmt::entropy], [`BerryMielke()`][agrmt::BerryMielke], [`BlairLacy()`][agrmt::BlairLacy], [`Kvalseth()`][agrmt::Kvalseth], [`lsquared()`][agrmt::lsquared], [`dsquared()`][agrmt::dsquared], [`MRQ()`][agrmt::MRQ], [`concentration()`][agrmt::concentration], [`dispersion()`][agrmt::dispersion], [`Reardon()`][agrmt::Reardon]
 }

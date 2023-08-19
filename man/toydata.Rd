@@ -9,7 +9,7 @@ An object of class \code{data.frame}
 \describe{
  \item{id}{A serial ID column}
  \item{group}{Groups called "them" and "us"}
- \item{party_cat}{Unordered party categories called "up", "down", "left", and "right"}
+ \item{party_cat}{Unordered party categories called "left", "right", "liberal", and "conservative"}
  \item{party_ord}{Ordinal party categories between 1 and 7}
  \item{att_name}{The name of ordered ratings scales for items of different lengths commonly found in attitudinal research: `att2val`, `att4val`, `att5val`, `att10val`, `att11val`, `att100val`, `att101val`}
  \item{att_val}{Values across attitude items in `att_name`, ranging between 0 and 100}

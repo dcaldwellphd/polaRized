@@ -77,6 +77,7 @@
 #' @importFrom tidyr drop_na
 #' @importFrom tidytable mutate map
 #' @importFrom srvyr as_survey_design
+#' @importFrom rlang :=
 #' @importFrom tidyselect any_of
 #' @importFrom dplyr select filter nest_by across rename_with
 #' @importFrom agrmt agreement polarization Leik consensus entropy BerryMielke BlairLacy Kvalseth lsquared dsquared MRQ concentration dispersion Reardon

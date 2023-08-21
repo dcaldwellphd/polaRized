@@ -18,25 +18,21 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-This package makes it easy to apply various measures of attitude polarization across potentially many ordered ratings scales in complex survey data. The two main functions are `polarize_assoc` and `polarize_distr`, which return key associational and distributional statitistics, respectively. The package also introduces some extensions to the `survey` package, enabling the incorporation of complex design features into the estimation of statistics commonly used to measure attitude polarization:
+This package makes it easy to apply various measures of attitude polarization across potentially many ordered ratings scales in complex survey data. The two main functions are `polarize_assoc` and `polarize_distr`, which return key associational and distributional statistics, respectively. The package also introduces some extensions to the `survey` package, enabling the incorporation of complex design features into the estimation of statistics commonly used to measure attitude polarization:
 
 - `svykurt` calculates kurtosis.
-- `svyskew` calculates standadized skewness.
+- `svyskew` calculates standardized skewness.
 - `svyextremism` calculates the proportion of extreme responses on ordered ratings scales with different lengths.
 
 Additionally, two helper functions make it easier to prepare data prior to calculating polarization: `filter_scale_length` returns ordered ratings scales that meet a user-defined threshold of unique values, which is useful for statistics that require a certain scale length; `spread_pairs` takes a name key and value key and spreads these columns across unique pairs of observations, making it easier to estimate the association between responses on different survey items.
 
 ## Installation
 
-The package can be installed direclty from [GitHub](https://github.com/dcaldwellphd/polaRized) using:
+The package can be installed directly from [GitHub](https://github.com/dcaldwellphd/polaRized).
 
 ```{r, message=FALSE, warning=FALSE, results = "hide", eval=FALSE}
 pak::pak("dcaldwellphd/polaRized")
-```
 
-Then load its functions and internal dataset using:
-
-```{r}
 library(polaRized)
 ```
 
@@ -45,6 +41,8 @@ library(polaRized)
 Apart from the `svykurt`, `svyskew`, and `svyextremism`, which are general extensions to the `survey` package and designed to be called like any other function from that package, `polaRized` functions expect data to be stacked in a longer format. There should be a single value column or (for associational measures of polarization) pair of value columns containing observations across groups. The built-in data set (`toydata`) comes in this format.
 
 ```{r}
+library(polaRized)
+
 data(toydata)
 head(toydata)
 ```
@@ -53,29 +51,113 @@ It has $n \times p$ rows recording the $nth$ respondent's rating on attitude ite
 
 ## Describing attitude polarization using the `polaRized` package
 
-Two main approaches to measuring attitude polarization are used in the political science literature: distributional and associational. Distributional measures describe aspects of the distribution of public opinion surrounding political issues, such as the dispersion, multimodality, and extremism in attitudes. The `polarize_distr` function includes many options for calculating these quantities, including variance, standard deviation, the interquartile range, kurtosis, and the proportion of extreme responses to ordered ratings scales. For example:
+Two main approaches to measuring attitude polarization are used in the political science literature: distributional and associational. These are the unifying themes of the two main functions implemented in this package: `polarize_distr` and `polarize_assoc`.
+
+Many studies summarize polarization through aspects of the distribution of public opinion surrounding political issues, such as the dispersion, multimodality, and extremism in attitudes [e.g., @Adams2012b; @DiMaggio1996; @Cohen2021]. The `polarize_distr` function provides many options for calculating these quantities, including the variance, standard deviation, interquartile range, kurtosis, and the proportion of extreme responses to ordered ratings scales. It can also return other statistics that do not directly measure distributional states of polarization but are useful for interpreting the changes causing them, i.e., the mean, median, and standardized skewness. Finally, the function also accepts methods for estimating consensus and disagreement on ordered rating scales from the the `agrmt` package, like van der Eijk's [-@VanDerEijk2001] agreement A.
+
+Many of these statistics are sensitive to scale length or only make sense when a scale has so many unique values. Variance and standard deviation depend on the central tendency of a distribution, which is problematic for very short scales where values are likely to be clustered at one extreme. In some cases, the `polarize_distr` function fails when provided scales below a certain length. For instance, the `svyextremism` function from this package will not accept attitude items with fewer than four unique values, whereas van der Eijk's agreement A defines polarization by disaggregating response frequencies into "triples" deviating from or conforming to unimodality.^[Calling `agrmt::agrement` or `agrmt::polarization` on frequency vectors with a length below three returns `NA`] To help meet these requirements, `polaRized` includes a helper function designed to filter out attitude scales below a user-defined threshold: `filter_scale_length`. The default is to subset items with four or more unique values.
 
 ```{r}
-attkurt <- polarize_distr(
-  data = toydata,
-  value = att_val,
-  measure = "kurt",
-  by = c("att_name", "group")
-)
+length(unique(toydata$att_name))
 
-print(attkurt)
+# Remove the binary att2val variable from toydata
+filtered_data <- filter_scale_length(
+  toydata, 
+  scale_names = att_name, 
+  scale_values = att_val, 
+  min_scale_length = 4
+  )
+
+length(unique(filtered_data$att_name))
 ```
 
-It can also return other statistics that do not directly measure distributional states of polarization but are useful for interpreting the changes causing them, i.e., the mean, median, and standardized skewness. Finally, the function also accepts methods for estimating consensus and disagreement on ordered rating scales from the the `agrmt` package, like van der Eijk's [-@VanDerEijk2001] agreement A.
+Then it is safe to request one of these measures from the `polarize_distr` function. Hence, to get the standard deviation in attitudes by item, we call:
+
+```{r}
+
+polarize_distr(
+  filtered_data,
+  value = att_val,
+  measure = "std",
+  by = "att_name"
+  )
+
+```
+
+The resulting output shows that the standard deviation is larger among longer ratings scales. If the goal is to compare the magnitude of these statistics across items with heterogeneous scale lengths, we can normalize on the fly using the `rescale_0_1` argument.
+
+```{r}
+
+polarize_distr(
+  filtered_data,
+  value = att_val,
+  measure = "std",
+  by = "att_name",
+  rescale_0_1 = TRUE
+  )
+
+```
+
+The `by` argument accepts multiple grouping variables, which is useful for comparing polarization in different populations:
+
+```{r}
+
+polarize_distr(
+  filtered_data,
+  value = att_val,
+  measure = "std",
+  by = c("att_name", "group"),
+  rescale_0_1 = TRUE
+  )
+
+```
+
+Leaving it `NULL` smooths across any grouping information contained in the data, resulting in a single value.
+
+```{r}
+
+polarize_distr(
+  filtered_data,
+  value = att_val,
+  measure = "std",
+  rescale_0_1 = TRUE
+  )
+
+```
+
+Distributional properties of polarization are intuitive, but much discussion of mass disagreement on political issues centers on associational measures [e.g., @Baldassarri2008]. For instance, partisan polarization on a political issue is the extent to which attitudes towards that issue are associated with partisanship. It is thus common to measure it using the Pearson correlation coefficient, especially two-party cases such as the United States [@Fiorina2008]. The built-in data for this package includes an ordinal party variable similar to the scale used to measure the strength of party identification in the US.
+
+```{r}
+
+unique(toydata$party_ord)
+
+```
+
+We can use the `polarize_assoc` function to get the Pearson correlation between this variable and attitudes on the different scales. Setting the `r_or_r2` argument to "r" gives:
+
+```{r}
+
+polarize_assoc(
+  toydata,
+  value_1 = att_val,
+  value_2 = party_ord,
+  r_or_r2 = "r",
+  by = "att_name"
+)
+
+```
+
+Many other countries have more than two large political parties, which are not necessarily ordered on a single dimension. @Caldwell2023 introduce 
+
+
+
+
+
 
 All of these options are fully integrated with the `survey` package and respect complex design features
 
 Options for including survey design features
 
-filtering scale lengths
 
-normalizing scales
-
-Grouping output and aggregating across scales
 
 

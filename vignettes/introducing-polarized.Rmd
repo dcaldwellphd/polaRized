@@ -137,19 +137,70 @@ We can use the `polarize_assoc` function to get the Pearson correlation between 
 
 ```{r}
 
+ap_r <- polarize_assoc(
+  toydata,
+  value_1 = att_val,
+  value_2 = party_ord,
+  r_or_r2 = "r",
+  by = "att_name"
+  )
+
+ap_r
+
+```
+
+Many other countries have more than two large political parties, which are not necessarily ordered on a single dimension. This makes it difficult to measure partisan polarization without assuming that political disagreement operates along a left-right ideological continuum. However, @Caldwell2023 introduce a novel extension to associational measures of polarization that does not require this assumption. The $R^2$ from a linear regression model is the square of the correlation between observed and predicted outcomes. Given an OLS model predicting attitudes towards an issue from indicators of party support, it thus measures the extent to which different partisans hold different positions on that issue.
+
+This approach to measuring polarization through the association between two sets of values is implemented by setting the `r_or_r2` argument to "r2" in the `polarize_assoc`.
+
+```{r}
+
+ap_r2 <- polarize_assoc(
+  toydata,
+  value_1 = att_val,
+  value_2 = party_ord,
+  r_or_r2 = "r2",
+  by = "att_name"
+  )
+
+ap_r2
+
+```
+ 
+The output returns the $R^2$ and adjusted $R^2$ from OLS models nested by any grouping information specified in the `by` argument.^[The adjusted $R^2$ is useful when comparing cases involving increasing numbers of political parties, which increases the number of predictors in OLS models and inflates the conventional $R^2$ statistic.] These statistics should be similar to the absolute value of the square root of the correlation coefficient.
+
+```{r}
+
+ap_r2 |> 
+  mutate()
+
+```
+
+Remember that R^2 is equal to the absolute value of the square root of the correlation coefficient.
+ 
+```{r}
+
 polarize_assoc(
   toydata,
   value_1 = att_val,
   value_2 = party_ord,
   r_or_r2 = "r",
   by = "att_name"
-)
+  ) |> 
+  dplyr::left_join(
+    polarize_assoc(
+  toydata,
+  value_1 = att_val,
+  value_2 = party_ord,
+  r_or_r2 = "r2",
+  by = "att_name"
+  )
+  ) |> 
+  dplyr::select(-adj_r2) |> 
+  dplyr::mutate(r2 = sqrt(r2))
+  
 
 ```
-
-Many other countries have more than two large political parties, which are not necessarily ordered on a single dimension. This makes it difficult to measure partisan polarization without assuming that political disagreement operates along similar left-right ideological lines. However, @Caldwell2023 introduce a novel extension to associational measures of polarization that does not assume unidimensional linearity. They use the $R^2$
-
-The $R^2$ from a linear regression model is the square of the correlation between observed and predicted outcomes. Given an OLS model predicting attitudes towards an issue from indicators of party support, it thus captures the association between observed attitudes and those predicted 
 
 
 

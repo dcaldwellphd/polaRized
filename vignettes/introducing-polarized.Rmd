@@ -133,7 +133,7 @@ unique(toydata$party_ord)
 
 ```
 
-We can use the `polarize_assoc` function to get the Pearson correlation between this variable and attitudes on the different scales. Setting the `r_or_r2` argument to "r" gives:
+We can use the `polarize_assoc` function to get the Pearson correlation between this variable and attitudes on the different scales. Setting the `r_or_r2` argument to "r", we get:
 
 ```{r}
 
@@ -147,7 +147,9 @@ polarize_assoc(
 
 ```
 
-Many other countries have more than two large political parties, which are not necessarily ordered on a single dimension. @Caldwell2023 introduce 
+Many other countries have more than two large political parties, which are not necessarily ordered on a single dimension. This makes it difficult to measure partisan polarization without assuming that political disagreement operates along similar left-right ideological lines. However, @Caldwell2023 introduce a novel extension to associational measures of polarization that does not assume unidimensional linearity. They use the $R^2$
+
+The $R^2$ from a linear regression model is the square of the correlation between observed and predicted outcomes. Given an OLS model predicting attitudes towards an issue from indicators of party support, it thus captures the association between observed attitudes and those predicted 
 
 
 

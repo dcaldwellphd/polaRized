@@ -3,6 +3,7 @@ title: "Introducing polaRized: An R Package for Estimating Political Attitude Po
 author: David Caldwell
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: vig-refs.bib
 vignette: >
   %\VignetteIndexEntry{Introducing polaRized: An R Package for Estimating Political Attitude Polarization in Complex Survey Data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -14,6 +15,19 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+```
+
+```{R,echo=FALSE,results='hide',message=FALSE,include=FALSE, eval=TRUE}
+if (!require(knitr))
+  install.packages("knitr")
+if (!require(pak))
+  install.packages("pak")
+if (!require(dplyr))
+  install.packages("dplyr")
+if (!require(tidyr))
+  install.packages("tidyr")
+if (!require(survey))
+  install.packages("survey")
 ```
 
 ## Overview
@@ -76,20 +90,17 @@ length(unique(filtered_data$att_name))
 Then it is safe to request one of these measures from the `polarize_distr` function. Hence, to get the standard deviation in attitudes by item, we call:
 
 ```{r}
-
 polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
   by = "att_name"
   )
-
 ```
 
 The resulting output shows that the standard deviation is larger among longer ratings scales. If the goal is to compare the magnitude of these statistics across items with heterogeneous scale lengths, we can normalize on the fly using the `rescale_0_1` argument.
 
 ```{r}
-
 polarize_distr(
   filtered_data,
   value = att_val,
@@ -97,13 +108,11 @@ polarize_distr(
   by = "att_name",
   rescale_0_1 = TRUE
   )
-
 ```
 
 The `by` argument accepts multiple grouping variables, which is useful for comparing polarization in different populations:
 
 ```{r}
-
 polarize_distr(
   filtered_data,
   value = att_val,
@@ -111,20 +120,17 @@ polarize_distr(
   by = c("att_name", "group"),
   rescale_0_1 = TRUE
   )
-
 ```
 
 Leaving it `NULL` smooths across any grouping information contained in the data, resulting in a single value.
 
 ```{r}
-
 polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
   rescale_0_1 = TRUE
   )
-
 ```
 
 ### Associational measures and `polarize_assoc`
@@ -132,15 +138,12 @@ polarize_distr(
 Distributional properties of polarization are intuitive, but much discussion of mass disagreement on political issues centers on associational measures [e.g., @Baldassarri2008]. For instance, partisan polarization on a political issue is the extent to which attitudes towards that issue are associated with partisanship. It is thus common to measure it using the Pearson correlation coefficient, especially two-party cases such as the United States [@Fiorina2008]. The built-in data for this package includes an ordinal party variable similar to the scale used to measure the strength of party identification in the US.
 
 ```{r}
-
 unique(toydata$party_ord)
-
 ```
 
 We can use the `polarize_assoc` function to get the Pearson correlation between this variable and attitudes on the different scales. Setting the `r_or_r2` argument to "r", we get:
 
 ```{r}
-
 ap_r <- polarize_assoc(
   toydata,
   value_1 = att_val,
@@ -150,7 +153,6 @@ ap_r <- polarize_assoc(
   )
 
 ap_r
-
 ```
 
 Many other countries have more than two large political parties, which are not necessarily ordered on a single dimension. This makes it difficult to measure partisan polarization without assuming that political disagreement operates along a left-right ideological continuum. However, @Caldwell2023 introduce a novel extension to associational measures of polarization that does not require this assumption. The $R^2$ from a linear regression model is the square of the correlation between observed and predicted outcomes. Given an OLS model predicting attitudes towards an issue from partisanship, it thus measures the extent to which different partisans hold different positions on that issue.
@@ -158,7 +160,6 @@ Many other countries have more than two large political parties, which are not n
 This approach to measuring polarization through the association between two sets of values is implemented by setting the `r_or_r2` argument to "r2" in the `polarize_assoc` function.
 
 ```{r}
-
 ap_r2 <- polarize_assoc(
   toydata,
   value_1 = att_val,
@@ -168,32 +169,26 @@ ap_r2 <- polarize_assoc(
   )
 
 ap_r2
-
 ```
  
 The output returns the $R^2$ and adjusted $R^2$ from OLS models nested by any grouping information specified in the `by` argument.^[The adjusted $R^2$ is useful when comparing cases involving varying numbers of political parties, which affects the number of predictors in OLS models and the resulting $R^2$ statistic.] These statistics should be very similar to the absolute value of the square root of the correlation coefficient.
 
 ```{r, message=FALSE}
-
 ap_r2 |> 
   dplyr::mutate(sqrt_r2 = sqrt(r2)) |> 
   dplyr::left_join(ap_r)
-
 ```
 
 The intended use case of the $R^2$ approach is to measure the extent of association between attitudes and unordered party values. Consider the `party_cat` variable in the internal data set, which measures support for four parties on two dimensions.
 
 ```{r}
-
 class(toydata$party_cat)
 unique(toydata$party_cat)
-
 ```
 
 To measure partisan polarization across these dimension, we pass `party_cat` to the `value_2` argument of the `polarize_assoc` function.
 
 ```{r}
-
 polarize_assoc(
   toydata,
   value_1 = att_val,
@@ -201,13 +196,11 @@ polarize_assoc(
   r_or_r2 = "r2",
   by = "att_name"
   )
-
 ```
 
 Behind the scenes, `polarize_assoc` fits OLS models predicting `value_1` from $n-1$ dummy variables for the groups in `value_2`. It is thus important to use the `value_2` argument for unordered categorical predictors. However, in cases where both value columns have a numeric class, the direction of this relationship does not affect the $R^2$ statistics returned.
 
 ```{r, message=FALSE}
-
 ap_r2 |> 
   dplyr::rename(att_party_r2 = r2) |>
   dplyr::select(-adj_r2) |>
@@ -222,13 +215,11 @@ ap_r2 |>
     ) |> 
   dplyr::rename(party_att_r2 = r2) |>
   dplyr::select(-adj_r2)
-
 ```
 
-Another application for associational measures is the correlation between attitudes on pairs of political issues, which is commonly used to capture ideological polarization [e.g., @Baldassarri2008; @Caldwell2023; @Munzert2013]. The `polaRized` package includes a helper function to get data like `toydata` into the format required by the `polarize_assoc` function.
+Another application for associational measures is the correlation between attitudes on pairs of political issues, which is commonly used to capture ideological polarization [e.g., @Baldassarri2008; @Caldwell2022; @Munzert2013]. The `polaRized` package includes a helper function to get data like `toydata` into the format required by the `polarize_assoc` function.
 
 ```{r}
-
 paired_toydata <- spread_pairs(
   toydata, 
   name_key = att_name, 
@@ -237,13 +228,11 @@ paired_toydata <- spread_pairs(
   )
 
 paired_toydata
-
 ```
 
 The `spread_pairs` function spreads a name-value key across unique pairs of observations, so that the two resulting value columns can be used to calculate associational measures of polarization by observed combinations of attitude item.
 
 ```{r}
-
 polarize_assoc(
   paired_toydata,
   value_1 = att_val1,
@@ -251,26 +240,105 @@ polarize_assoc(
   r_or_r2 = "r",
   by = c("att_name1", "att_name2")
   )
-
 ```
 
 ## Use of the `survey` package
 
-`polaRized` is designed to work through the `survey` package. What `polarize_distr` and `polarize_assoc` do is iterate over groups supplied to the `by` argument and calculate statistics on individual \code{survey.design} objects. Both functions take many arguments from `survey::svydesign` as implemented in the `srvyr` package, meaning that these arguments do not need to be supplied as a formula (i.e., "~ <design_feature>"). The internal data set includes an artificial weight column to demonstrate this feature.
+`polaRized` is designed to work through the `survey` package. What `polarize_distr` and `polarize_assoc` do is iterate over groups supplied to the `by` argument and calculate statistics on individual \code{survey.design} objects. Both functions take many arguments from `survey::svydesign` as implemented in the `srvyr` package, which is to say that these arguments *do not* need to be supplied in formula syntax (i.e., "~ <DESIGN FEATURE>"). The internal data set includes an artificial weight column to demonstrate this feature, but more complex survey designs can be specified by replacing the defaults in other `survey::svydesign` arguments.
 
 ```{r}
-
 polarize_distr(
   toydata,
   value = att_val,
   measure = "std",
   by = "att_name",
-  weights = weight
+  ids = NULL,
+  probs = NULL,
+  strata = NULL,
+  fpc = NULL,
+  weights = weight,
+  nest = FALSE
 )
-
 ```
 
-The `polaRized` package adds its own extensions to the survey package
+Because `polarize_distr` and `polarize_assoc` are designed to iterate over survey design objects nested by attitude items and other grouping information, `polaRized` includes some extensions to the `survey` package making it easier to calculate certain statistics. For instance, the [documentation](https://search.r-project.org/CRAN/refmans/survey/html/svycontrast.html) for `survey::svycontrast` shows how to estimate standardized skewness on a variable.
 
+```{r}
+library(survey)
+data(api)
+dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
 
+## Example: standardised skewness coefficient
+moments <- svymean(~I(api00^3) + I(api00^2) + I(api00), dclus1)
+svycontrast(
+  moments, 
+  quote(
+    (`I(api00^3)` - 3 * `I(api00^2)` * `I(api00)` + 3 * `I(api00)` * `I(api00)`^2 - `I(api00)`^3) / (`I(api00^2)` - `I(api00)`^2)^1.5
+    )
+  )
+```
 
+Programmatically, this approach is labour-intensive and (because it involves quoting names containing back ticks) difficult. Hence, the `polaRized` package includes a wrapper to get the standardized skewness coefficient on variables in a survey design.
+
+```{r}
+svyskew(~api00, design = dclus1)
+```
+
+Based on [advice](https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package) from the `survey` package author, Thomas Lumley, another function extends this approach to return kurtosis.
+
+```{r}
+svykurt(~api00, design = dclus1, excess = FALSE)
+```
+
+Following the treatment in Stuart and Ord [-@Stuart1994, Ch. 3], `svykurt` writes the variance and fourth central moment in terms of raw moments and transforms into kurtosis via `survey::svycontrast`.
+
+```{r}
+moments <- svymean(~api00 + I(api00^2) + I(api00^3) + I(api00^4), dclus1)
+
+central_moments <- svycontrast(
+  moments, 
+  list(
+    mu4 = quote(
+      -3 * api00^4 + 6 * api00^2 * `I(api00^2)` - 4 * api00 * `I(api00^3)` + `I(api00^4)`
+      ),
+    sigma2 = quote(`I(api00^2)` - api00^2)
+    )
+  )
+
+svycontrast(central_moments, quote(mu4 / (sigma2 * sigma2)))
+```
+
+The final extension to the `survey` package is specific to cases where you want to estimate proportions of extreme values on ordered ratings scales with certain lengths of unique values.
+
+```{r}
+wider_td <- tidyr::pivot_wider(
+  toydata,
+  names_from = att_name,
+  values_from = att_val
+)
+
+toydesign <- svydesign(data = wider_td, ids = ~1, weights = ~weight)
+
+svyextremism(~att5val, design = toydesign, na.rm = TRUE)
+```
+
+The output shows that this is essentially calling `survey::svyciprop(~I(att5val %in% c(1, 5)), toydesign)`. Indeed, the function accepts other `svyciprop` arguments for setting the method and width used to estimate confidence intervals for the proportion. However, guided by previous research into attitude polarization [@Adams2012b; @Caldwell2022; @Cohen2021], `svyextremism` has a built-in algorithm for classifying extreme values on variables with lengths typically observed among likert scales or feeling thermometer items. If the scale has less than 10 (and more than 3) unique values, the function uses its minimum and maximum as extreme values. If the scale has 10 or 11 unique values, extreme values also include the second lowest and highest response categories. If the scale is a feeling thermometer with 100 or 101 unique response categories, the top 20 and bottom 20 unique values are classed as extreme. This allows the `polarize_distr` function to iterate over ordered ratings scales with heterogeneous lengths, estimating the proportion of extreme attitudes by item.
+
+```{r}
+toydata |> 
+  filter_scale_length(
+    scale_names = att_name,
+    scale_values = att_val
+    ) |> 
+  polarize_distr(
+    value = att_val,
+    measure = "extremism",
+    by = "att_name"
+    )
+```
+
+## Acknowledgements
+
+`polaRized` mainly collects functions and code written by other people. It would not exist without contributions from the `tidyverse` team and authors of the `survey`, `srvyr`, and `agrmt` packages. In particular, I would like to thank Thomas Lumley for his speed and patience when responding to questions posted on Stack Overflow [here](https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package) and [here](https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i).
+
+## References

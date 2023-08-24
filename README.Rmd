@@ -1,14 +1,9 @@
 ---
-title: "Introducing polaRized: An R Package for Estimating Political Attitude Polarization in Complex Survey Data"
-author: David Caldwell
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: github_document
 bibliography: bibliography.bib
-vignette: >
-  %\VignetteIndexEntry{Introducing polaRized: An R Package for Estimating Political Attitude Polarization in Complex Survey Data}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -17,18 +12,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{R,echo=FALSE,results='hide',message=FALSE,include=FALSE, eval=TRUE}
-if (!require(knitr))
-  install.packages("knitr")
-if (!require(pak))
-  install.packages("pak")
-if (!require(dplyr))
-  install.packages("dplyr")
-if (!require(tidyr))
-  install.packages("tidyr")
-if (!require(survey))
-  install.packages("survey")
-```
+# polaRized <img id="logo" src="man/figures/logo.png" align="right" width="17%" height="17%" />
 
 ## Overview
 

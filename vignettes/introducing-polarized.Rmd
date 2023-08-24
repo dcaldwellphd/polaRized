@@ -225,13 +225,52 @@ ap_r2 |>
 
 ```
 
-Another application for associational measures is the correlation between attitudes on pairs of political issues, which is commonly used to capture ideological polarization [e.g., @Baldassarri2008; @Caldwell2023; @Munzert2013]. 
+Another application for associational measures is the correlation between attitudes on pairs of political issues, which is commonly used to capture ideological polarization [e.g., @Baldassarri2008; @Caldwell2023; @Munzert2013]. The `polaRized` package includes a helper function to get data like `toydata` into the format required by the `polarize_assoc` function.
 
+```{r}
 
-All of these options are fully integrated with the `survey` package and respect complex design features
+paired_toydata <- spread_pairs(
+  toydata, 
+  name_key = att_name, 
+  value_key = att_val, 
+  other_keys = c("id", "group")
+  )
 
-Options for including survey design features
+paired_toydata
 
+```
+
+The `spread_pairs` function spreads a name-value key across unique pairs of observations, so that the two resulting value columns can be used to calculate associational measures of polarization by observed combinations of attitude item.
+
+```{r}
+
+polarize_assoc(
+  paired_toydata,
+  value_1 = att_val1,
+  value_2 = att_val2,
+  r_or_r2 = "r",
+  by = c("att_name1", "att_name2")
+  )
+
+```
+
+## Use of the `survey` package
+
+`polaRized` is designed to work through the `survey` package. What `polarize_distr` and `polarize_assoc` do is iterate over groups supplied to the `by` argument and calculate statistics on individual \code{survey.design} objects. Both functions take many arguments from `survey::svydesign` as implemented in the `srvyr` package, meaning that these arguments do not need to be supplied as a formula (i.e., "~ <design_feature>"). The internal data set includes an artificial weight column to demonstrate this feature.
+
+```{r}
+
+polarize_distr(
+  toydata,
+  value = att_val,
+  measure = "std",
+  by = "att_name",
+  weights = weight
+)
+
+```
+
+The `polaRized` package adds its own extensions to the survey package
 
 
 

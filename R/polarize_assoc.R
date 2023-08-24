@@ -26,7 +26,7 @@
 #'
 #' Caldwell, D.,  Cohen, C. and Vivyan, N. (2023). Long-Run Trends in Political Polarization of Climate Policy-Relevant Attitudes Across Countries. \emph{Working Paper}.
 #'
-#' @seealso [`svyvar()`][survey::svyvar], [`svyglm()`][survey::svyglm]
+#' @seealso \code{\link[survey]{svyvar}}, \code{\link[survey]{svyglm}}
 #'
 #' @return A data frame object containing the measure of association between \code{value_1} and \code{value_2} for any groups in \code{by}.
 #'

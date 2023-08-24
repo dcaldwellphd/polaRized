@@ -11,7 +11,7 @@
 #'
 #' @return An object of class \code{svrepstat} giving the skewness and its standard error.
 #'
-#' @seealso [`svycontrast()`][survey::svycontrast]
+#' @seealso \code{\link[survey]{svycontrast}}
 
 #' @note This function generalizes the approach to estimating skewness provided in the "Examples" section of the documentation for \code{survey::svycontrast}. It has been developed without the knowledge or endorsement of the \code{survey} package authors.
 #'

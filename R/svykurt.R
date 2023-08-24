@@ -12,9 +12,9 @@
 #'
 #' @return An object of class \code{svrepstat} giving the kurtosis its standard error.
 #'
-#' @seealso [`svycontrast()`][survey::svycontrast]
+#' @seealso \code{\link[survey]{svycontrast}}
 
-#' @note The approach used in this function is based on guidance from Thomas Lumley, the \code{survey} package's author (see \code{\link[here]{https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package}} and \code{\link[here]{https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i}})
+#' @note The approach used in this function is based on guidance from Thomas Lumley, the \code{survey} package's author (see \href{https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package}{here} and \href{https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i}{here}).
 #'
 #' @examples
 #' library(survey)

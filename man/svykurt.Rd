@@ -25,7 +25,7 @@ Calculates kurtosis with complex survey data
 This function extends the \code{survey} package by calculating the kurtosis of a variable in a complex survey design. It writes the variance and fourth central moment in terms of raw moments and then transforms into kurtosis via \code{svycontrast}. Setting \code{excess} to TRUE allows the output to be compared with 0, the excess kurtosis of any univariate normal distribution.
 }
 \note{
-The approach used in this function is based on guidance from Thomas Lumley, the \code{survey} package's author (see {https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package}{here} and {https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i}{here}).
+The approach used in this function is based on guidance from Thomas Lumley, the \code{survey} package's author (see \href{https://stackoverflow.com/questions/76733872/using-svyrecvar-to-get-the-variance-of-a-statistic-in-the-survey-r-package}{here} and \href{https://stackoverflow.com/questions/76830298/using-svycontrast-inside-a-function-when-contrasts-involve-backticks-and-i}{here}).
 }
 \examples{
 library(survey)
@@ -37,5 +37,5 @@ svykurt(formula = ~att_val, design = toydesign, na.rm = TRUE)
 
 }
 \seealso{
-[`svycontrast()`][survey::svycontrast]
+\code{\link[survey]{svycontrast}}
 }

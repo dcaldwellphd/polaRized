@@ -75,5 +75,5 @@ ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value
 Caldwell, D.,  Cohen, C. and Vivyan, N. (2023). Long-Run Trends in Political Polarization of Climate Policy-Relevant Attitudes Across Countries. \emph{Working Paper}.
 }
 \seealso{
-[`svyvar()`][survey::svyvar], [`svyglm()`][survey::svyglm]
+\code{\link[survey]{svyvar}}, \code{\link[survey]{svyglm}}
 }

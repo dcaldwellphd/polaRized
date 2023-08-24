@@ -35,5 +35,5 @@ svyskew(formula = ~att_val, design = toydesign, na.rm = TRUE)
 
 }
 \seealso{
-[`svycontrast()`][survey::svycontrast]
+\code{\link[survey]{svycontrast}}
 }

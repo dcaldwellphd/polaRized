@@ -189,7 +189,9 @@ polarize_assoc <- function(
     }
 
   # Removing nested data from output
-  output <- select(results, -assoc_list)
+  output <- results |>
+    select(-assoc_list) |>
+    ungroup()
 
   return(output)
 

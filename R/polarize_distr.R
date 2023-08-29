@@ -329,7 +329,8 @@ polarize_distr <- function(
       -any_of(c(
         "distr_list", "quants", "q1", "q3"
         ))
-      )
+      ) |>
+    ungroup()
 
   return(output)
 

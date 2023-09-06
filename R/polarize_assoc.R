@@ -51,7 +51,7 @@
 #' @importFrom tidyr drop_na
 #' @importFrom srvyr as_survey_design
 #' @importFrom tidyselect any_of
-#' @importFrom dplyr select filter nest_by across mutate
+#' @importFrom dplyr select filter nest_by across mutate ungroup
 #' @importFrom purrr pluck
 
 polarize_assoc <- function(

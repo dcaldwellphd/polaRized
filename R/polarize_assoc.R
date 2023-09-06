@@ -6,7 +6,7 @@
 #' @param value_1 A column containing values on some variable or set of variables, such as attitude item responses.
 #' @param value_2 A column containing values on a second variable or set of variables (e.g., political party affiliation).
 #' @param r_or_r2 A string specifying the measure of association. See Details below.
-#' @param by A character vector of optional groups to nest observations by (e.g., survey wave, country, social group).
+#' @param by Optional groups to nest observations by (e.g., attitude item, survey wave, country).
 #' @param ids Variables specifying cluster ids from largest level to smallest level (leaving the argument empty, NULL, 1, or 0 indicate no clusters).
 #' @param probs Variables specifying cluster sampling probabilities.
 #' @param strata Variables specifying strata.
@@ -33,7 +33,7 @@
 #' @examples
 #' data(toydata)
 #' # Partisan polarization using Pearson correlation between attitude item and ordinal party affiliation variable
-#' party_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c("att_name", "group"))
+#' party_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c(att_name, group))
 #'
 #' # Partisan polarization using unordered party categories and no groups
 #' multiparty_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_cat, r_or_r2 = "r2")
@@ -43,7 +43,7 @@
 #' ideology_pol <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r")
 #'
 #' # Ideological polarization grouping R-squared statistics by attitude pair
-#' ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r2", by = c("att_name1", "att_name2"))
+#' ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r2", by = c(att_name1, att_name2))
 #'
 #' @export
 #'
@@ -75,6 +75,14 @@ polarize_assoc <- function(
   value_2 <- substitute(value_2)
   value_2_eval <- eval(value_2, data)
   weights <- substitute(weights)
+
+  # Convert unquoted column names in 'by' to character strings
+  by_sub <- substitute(by)
+  if (is.null(by_sub) || is.symbol(by_sub)) {
+    by <- deparse(by_sub)
+    } else {
+      by <- sapply(as.list(by_sub)[-1L], deparse)
+      }
 
   # Function to iterate over groups supplied to by argument,
   # calculating the association betwen values using syntax

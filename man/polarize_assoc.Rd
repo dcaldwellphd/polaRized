@@ -27,7 +27,7 @@ polarize_assoc(
 
 \item{r_or_r2}{A string specifying the measure of association. See Details below.}
 
-\item{by}{A character vector of optional groups to nest observations by (e.g., survey wave, country, social group).}
+\item{by}{Optional groups to nest observations by (e.g., attitude item, survey wave, country).}
 
 \item{ids}{Variables specifying cluster ids from largest level to smallest level (leaving the argument empty, NULL, 1, or 0 indicate no clusters).}
 
@@ -58,7 +58,7 @@ When \code{r_or_r2} is set to "r2", \code{polarize_assoc} fits OLS regression mo
 \examples{
 data(toydata)
 # Partisan polarization using Pearson correlation between attitude item and ordinal party affiliation variable
-party_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c("att_name", "group"))
+party_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_ord, r_or_r2 = "r", by = c(att_name, group))
 
 # Partisan polarization using unordered party categories and no groups
 multiparty_pol <- polarize_assoc(data = toydata, value_1 = att_val, value_2 = party_cat, r_or_r2 = "r2")
@@ -68,7 +68,7 @@ paired_toydata <- spread_pairs(data = toydata, name_key = att_name, value_key = 
 ideology_pol <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r")
 
 # Ideological polarization grouping R-squared statistics by attitude pair
-ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r2", by = c("att_name1", "att_name2"))
+ideology_pol2 <- polarize_assoc(data = paired_toydata, value_1 = att_val1, value_2 = att_val2, r_or_r2 = "r2", by = c(att_name1, att_name2))
 
 }
 \references{

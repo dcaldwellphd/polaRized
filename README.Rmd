@@ -91,7 +91,7 @@ polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
-  by = "att_name"
+  by = att_name
   )
 ```
 
@@ -102,7 +102,7 @@ polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
-  by = "att_name",
+  by = att_name,
   rescale_0_1 = TRUE
   )
 ```
@@ -114,7 +114,7 @@ polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
-  by = c("att_name", "group"),
+  by = c(att_name, group),
   rescale_0_1 = TRUE
   )
 ```
@@ -146,7 +146,7 @@ ap_r <- polarize_assoc(
   value_1 = att_val,
   value_2 = party_ord,
   r_or_r2 = "r",
-  by = "att_name"
+  by = att_name
   )
 
 ap_r
@@ -162,7 +162,7 @@ ap_r2 <- polarize_assoc(
   value_1 = att_val,
   value_2 = party_ord,
   r_or_r2 = "r2",
-  by = "att_name"
+  by = att_name
   )
 
 ap_r2
@@ -191,7 +191,7 @@ polarize_assoc(
   value_1 = att_val,
   value_2 = party_cat,
   r_or_r2 = "r2",
-  by = "att_name"
+  by = att_name
   )
 ```
 
@@ -207,7 +207,7 @@ ap_r2 |>
       value_1 = party_ord,
       value_2 = att_val,
       r_or_r2 = "r2",
-      by = "att_name"
+      by = att_name
       )
     ) |> 
   dplyr::rename(party_att_r2 = r2) |>
@@ -221,7 +221,7 @@ paired_toydata <- spread_pairs(
   toydata, 
   name_key = att_name, 
   value_key = att_val, 
-  other_keys = c("id", "group")
+  other_keys = c(id, group)
   )
 
 paired_toydata
@@ -235,7 +235,7 @@ polarize_assoc(
   value_1 = att_val1,
   value_2 = att_val2,
   r_or_r2 = "r",
-  by = c("att_name1", "att_name2")
+  by = c(att_name1, att_name2)
   )
 ```
 
@@ -248,7 +248,7 @@ polarize_distr(
   toydata,
   value = att_val,
   measure = "std",
-  by = "att_name",
+  by = att_name,
   ids = NULL,
   probs = NULL,
   strata = NULL,
@@ -329,7 +329,7 @@ toydata |>
   polarize_distr(
     value = att_val,
     measure = "extremism",
-    by = "att_name"
+    by = att_name
     )
 ```
 

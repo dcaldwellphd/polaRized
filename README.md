@@ -133,10 +133,9 @@ polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
-  by = "att_name"
+  by = att_name
   )
 #> # A tibble: 6 × 2
-#> # Rowwise:  att_name
 #>   att_name  att_val_std
 #>   <chr>           <dbl>
 #> 1 att100val       29.0 
@@ -157,11 +156,10 @@ polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
-  by = "att_name",
+  by = att_name,
   rescale_0_1 = TRUE
   )
 #> # A tibble: 6 × 2
-#> # Rowwise:  att_name
 #>   att_name  att_val_std
 #>   <chr>           <dbl>
 #> 1 att100val       0.292
@@ -180,11 +178,10 @@ polarize_distr(
   filtered_data,
   value = att_val,
   measure = "std",
-  by = c("att_name", "group"),
+  by = c(att_name, group),
   rescale_0_1 = TRUE
   )
 #> # A tibble: 12 × 3
-#> # Rowwise:  att_name, group
 #>    att_name  group att_val_std
 #>    <chr>     <chr>       <dbl>
 #>  1 att100val them        0.289
@@ -212,7 +209,6 @@ polarize_distr(
   rescale_0_1 = TRUE
   )
 #> # A tibble: 1 × 1
-#> # Rowwise: 
 #>   att_val_std
 #>         <dbl>
 #> 1       0.281
@@ -246,12 +242,11 @@ ap_r <- polarize_assoc(
   value_1 = att_val,
   value_2 = party_ord,
   r_or_r2 = "r",
-  by = "att_name"
+  by = att_name
   )
 
 ap_r
 #> # A tibble: 7 × 2
-#> # Rowwise:  att_name
 #>   att_name         r
 #>   <chr>        <dbl>
 #> 1 att100val  0.00567
@@ -284,12 +279,11 @@ ap_r2 <- polarize_assoc(
   value_1 = att_val,
   value_2 = party_ord,
   r_or_r2 = "r2",
-  by = "att_name"
+  by = att_name
   )
 
 ap_r2
 #> # A tibble: 7 × 3
-#> # Rowwise:  att_name
 #>   att_name          r2    adj_r2
 #>   <chr>          <dbl>     <dbl>
 #> 1 att100val 0.0000322  -0.000551
@@ -311,7 +305,6 @@ ap_r |>
   dplyr::mutate(r_raised = r^2) |> 
   dplyr::left_join(ap_r2)
 #> # A tibble: 7 × 5
-#> # Rowwise:  att_name
 #>   att_name         r   r_raised         r2    adj_r2
 #>   <chr>        <dbl>      <dbl>      <dbl>     <dbl>
 #> 1 att100val  0.00567 0.0000322  0.0000322  -0.000551
@@ -344,10 +337,9 @@ polarize_assoc(
   value_1 = att_val,
   value_2 = party_cat,
   r_or_r2 = "r2",
-  by = "att_name"
+  by = att_name
   )
 #> # A tibble: 7 × 3
-#> # Rowwise:  att_name
 #>   att_name        r2    adj_r2
 #>   <chr>        <dbl>     <dbl>
 #> 1 att100val 0.00487   0.00300 
@@ -376,13 +368,12 @@ ap_r2 |>
       value_1 = party_ord,
       value_2 = att_val,
       r_or_r2 = "r2",
-      by = "att_name"
+      by = att_name
       )
     ) |> 
   dplyr::rename(party_att_r2 = r2) |>
   dplyr::select(-adj_r2)
 #> # A tibble: 7 × 3
-#> # Rowwise:  att_name
 #>   att_name  att_party_r2 party_att_r2
 #>   <chr>            <dbl>        <dbl>
 #> 1 att100val   0.0000322    0.0000322 
@@ -406,7 +397,7 @@ paired_toydata <- spread_pairs(
   toydata, 
   name_key = att_name, 
   value_key = att_val, 
-  other_keys = c("id", "group")
+  other_keys = c(id, group)
   )
 
 paired_toydata
@@ -437,10 +428,9 @@ polarize_assoc(
   value_1 = att_val1,
   value_2 = att_val2,
   r_or_r2 = "r",
-  by = c("att_name1", "att_name2")
+  by = c(att_name1, att_name2)
   )
 #> # A tibble: 21 × 3
-#> # Rowwise:  att_name1, att_name2
 #>    att_name1 att_name2        r
 #>    <chr>     <chr>        <dbl>
 #>  1 att100val att101val -0.0181 
@@ -474,7 +464,7 @@ polarize_distr(
   toydata,
   value = att_val,
   measure = "std",
-  by = "att_name",
+  by = att_name,
   ids = NULL,
   probs = NULL,
   strata = NULL,
@@ -483,7 +473,6 @@ polarize_distr(
   nest = FALSE
 )
 #> # A tibble: 7 × 2
-#> # Rowwise:  att_name
 #>   att_name  att_val_std
 #>   <chr>           <dbl>
 #> 1 att100val      28.8  
@@ -609,10 +598,9 @@ toydata |>
   polarize_distr(
     value = att_val,
     measure = "extremism",
-    by = "att_name"
+    by = att_name
     )
 #> # A tibble: 6 × 2
-#> # Rowwise:  att_name
 #>   att_name  att_val_extremism
 #>   <chr>                 <dbl>
 #> 1 att100val             0.401

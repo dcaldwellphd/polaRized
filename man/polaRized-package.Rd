@@ -21,5 +21,10 @@ Useful links:
 \author{
 \strong{Maintainer}: David Caldwell \email{dcaldwellphd@gmail.com}
 
+Authors:
+\itemize{
+  \item Gidon Cohen \email{gidon.cohen@durham.ac.uk}
+}
+
 }
 \keyword{internal}

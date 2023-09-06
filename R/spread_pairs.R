@@ -5,13 +5,13 @@
 #' @param data A data set object
 #' @param name_key A column containing name keys
 #' @param value_key A column containing value keys
-#' @param other_keys A character vector of other columns to join by and preserve in the output
+#' @param other_keys Other columns to join by and preserve in the output
 #'
 #' @return A data frame object with name and value keys spread across unique pairs of observations
 #'
 #' @examples
 #' data(toydata)
-#' paired_items <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
+#' paired_items <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c(id, group))
 #'
 #' @export
 #' @importFrom dplyr distinct pull rename select left_join rename_with
@@ -28,6 +28,14 @@ spread_pairs <- function(
   # For referencing values passed to name_key and value_key arguments
   name_key <- substitute(name_key)
   value_key <- substitute(value_key)
+
+  # Convert unquoted column names in 'other_keys' to character strings
+  other_keys_sub <- substitute(other_keys)
+  if (is.null(other_keys_sub) || is.symbol(other_keys_sub)) {
+    other_keys <- deparse(other_keys_sub)
+  } else {
+    other_keys <- sapply(as.list(other_keys_sub)[-1L], deparse)
+  }
 
   # Store character vector of unique names
   names <- data |>

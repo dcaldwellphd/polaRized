@@ -13,7 +13,7 @@ spread_pairs(data, name_key, value_key, other_keys = NULL)
 
 \item{value_key}{A column containing value keys}
 
-\item{other_keys}{A character vector of other columns to join by and preserve in the output}
+\item{other_keys}{Other columns to join by and preserve in the output}
 }
 \value{
 A data frame object with name and value keys spread across unique pairs of observations
@@ -23,6 +23,6 @@ Takes a name key and value key and spreads into unique pairs of observations
 }
 \examples{
 data(toydata)
-paired_items <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c("id", "group"))
+paired_items <- spread_pairs(data = toydata, name_key = att_name, value_key = att_val, other_keys = c(id, group))
 
 }

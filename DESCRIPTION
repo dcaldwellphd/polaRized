@@ -2,8 +2,20 @@ Package: polaRized
 Type: Package
 Title: Estimating Political Attitude Polarization in Complex Survey Data
 Version: 0.1.0
-Authors@R: person("David", "Caldwell", email = "dcaldwellphd@gmail.com",
-  role = c("aut", "cre"))
+Authors@R: c(
+  person(
+    "David", 
+    "Caldwell", 
+    email = "dcaldwellphd@gmail.com",
+    role = c("aut", "cre")
+    ),
+  person(
+    "Gidon",
+    "Cohen",
+    email = "gidon.cohen@durham.ac.uk",
+    role = "aut"
+    )
+  )
 Description: A one-stop-shop for measures of attitude polarization
   commonly used in the political science literature. It makes it
   easy to summarize distributional and associational properties among 

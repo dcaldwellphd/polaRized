@@ -70,8 +70,8 @@
 #'
 #' @export
 #'
-#' @importFrom survey svymean svyvar
-#' @importFrom tidyr drop_na pivot_longer
+#' @importFrom survey svymean svyvar svytable
+#' @importFrom tidyr drop_na pivot_longer unnest_wider
 #' @importFrom srvyr as_survey_design
 #' @importFrom tidyselect any_of
 #' @importFrom dplyr select filter nest_by across rename_with mutate summarise ungroup

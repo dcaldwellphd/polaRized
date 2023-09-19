@@ -18,7 +18,7 @@
 #'
 #' @export
 #'
-#' @importFrom dplyr summarise filter pull
+#' @importFrom dplyr summarise filter pull n_distinct
 
 filter_scale_length <- function(
     data,
@@ -27,18 +27,15 @@ filter_scale_length <- function(
     min_scale_length = 4
     ) {
 
-  # Define a function to calculate the length of unique values in a vector
-  scale_length <- function(x){
-    x <- x[!is.na(x)]
-    length(unique(x))
-  }
   # Create vector of scale names that meet the minimum length threshold
   meets_min_scale <- data |>
     summarise(
-      scale_lengths = scale_length({{ scale_values }}),
+      scale_length = n_distinct(
+        {{ scale_values }}, na.rm = TRUE
+        ),
       .by = {{ scale_names }}
       ) |>
-    filter(scale_lengths >= min_scale_length) |>
+    filter(scale_length >= min_scale_length) |>
     pull({{ scale_names }})
 
   # Filter data to scale names in meets_min_scale

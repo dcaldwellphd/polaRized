@@ -71,10 +71,18 @@ polarize_assoc <- function(
 
   # For referencing values passed to value_1, value_2, and weights arguments
   value_1 <- substitute(value_1)
-  value_1_eval <- eval(value_1, data)
   value_2 <- substitute(value_2)
-  value_2_eval <- eval(value_2, data)
   weights <- substitute(weights)
+
+  if (r_or_r2 == "r" && 
+      (!is.numeric(data[[deparse(value_1)]]) || 
+       !is.numeric(data[[deparse(value_2)]]))) {
+    stop("Cannot calculate Pearson correlation with non-numeric value columns.")
+  }
+
+  if (r_or_r2 == "r2" && !is.numeric(data[[deparse(value_1)]])) {
+    stop("Cannot calculate OLS model(s) with non-numeric value_1 column.")
+  }
 
   # Convert unquoted column names in 'by' to character strings
   by_sub <- substitute(by)
@@ -94,6 +102,7 @@ polarize_assoc <- function(
     ) {
 
       if (r_or_r2 == "r") {
+
       # Syntax for the formula compatible with svyvar
       fmla <- as.formula(paste0("~", col1, " + ", col2))
       var <- survey::svyvar(fmla, design = data)
@@ -104,13 +113,14 @@ polarize_assoc <- function(
       return(assoc)
 
       } else if (r_or_r2 == "r2") {
+        
       # Syntax for the formula compatible with svyglm
       fmla <- as.formula(paste0(col1, "~", col2))
       assoc <- survey::svyglm(fmla, design = data)
       return(summary.lm(assoc))
 
       } else {
-      stop("Did you forget to set the 'r_or_r2' argument to one of these values?")
+      stop("The 'r_or_r2' argument is not set to one of these values.")
       }
 
     }

@@ -1,4 +1,3 @@
-
 test_that("filter_scale_length filters out scales with fewer than 4 unique values", {
   data(toydata)
   

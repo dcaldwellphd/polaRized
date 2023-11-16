@@ -7,7 +7,8 @@ test_that("polarize_assoc returns a single value with no grouping variables", {
     data(toydata)
   
     result <- polarize_assoc(
-        toydata, value_1 = att_val, 
+        toydata, 
+        value_1 = att_val, 
         value_2 = party_ord, 
         r_or_r2 = "r",
         by = NULL
@@ -22,7 +23,8 @@ test_that("polarize_assoc returns one value for each level of a single grouping 
     data(toydata)
 
     result <- polarize_assoc(
-        toydata, value_1 = att_val, 
+        toydata, 
+        value_1 = att_val, 
         value_2 = party_ord, 
         r_or_r2 = "r",
         by = att_name
@@ -37,7 +39,8 @@ test_that("polarize_assoc returns one value for each level of multiple grouping 
     data(toydata)
 
     result <- polarize_assoc(
-        toydata, value_1 = att_val, 
+        toydata, 
+        value_1 = att_val,
         value_2 = party_ord, 
         r_or_r2 = "r",
         by = c(att_name, group)

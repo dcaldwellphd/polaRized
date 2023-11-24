@@ -71,6 +71,7 @@ spread_pairs <- function(
       by = c("name_key_join" = "V1"),
       relationship = "many-to-many"
     ) |>
+    drop_na(V2) |>
     # Adding in second column of att_pairs
     left_join(
       input,

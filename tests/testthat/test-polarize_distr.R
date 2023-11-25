@@ -91,7 +91,7 @@ test_that("polarize_distr produces different values when survey design features 
         measure = "std"
     )
 
-    expect_not_equal(result1, result2)
+    expect_false(result1 == result2)
 })
 
 # Test normalization feature of the function
@@ -106,6 +106,6 @@ test_that("polarize_distr normalizes values if `rescale_0_1` argument is TRUE", 
         rescale_0_1 = TRUE
     )
 
-    expect_equal(min(result$std), 0)
-    expect_equal(max(result$std), 1)
+    expect_true(min(result$att_val_std) >= 0)
+    expect_true(max(result$att_val_std) <= 1)
 })

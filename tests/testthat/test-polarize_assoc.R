@@ -126,5 +126,5 @@ test_that("polarize_assoc produces different values when survey design features 
         r_or_r2 = "r"
     )
 
-    expect_not_equal(result1, result2)
+    expect_false(result1 == result2)
 })

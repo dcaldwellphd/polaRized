@@ -71,7 +71,6 @@ spread_pairs <- function(
       by = c("name_key_join" = "V1"),
       relationship = "many-to-many"
     ) |>
-    drop_na(V2) |>
     # Adding in second column of att_pairs
     left_join(
       input,
@@ -83,6 +82,8 @@ spread_pairs <- function(
       suffix = c("1", "2"),
       relationship = "many-to-many"
     ) |>
+    # Removing rows 
+    drop_na(name_key_join, V2) |>
     # Using original name column to rename pair keys
     dplyr::rename_with(
       ~ paste0(name_key, "1", recycle0 = TRUE),
